@@ -1,5 +1,5 @@
-const SKILLS = await fetch('/static/data/skills.json').then(resp => resp.json())
-const SPELLS = await fetch('/static/data/spells.json').then(resp => resp.json())
+const SKILLS = await fetch('https://mforv.github.io/yrmenfell/static/data/skills.json').then(resp => resp.json())
+const SPELLS = await fetch('https://mforv.github.io/yrmenfell/static/data/spells.json').then(resp => resp.json())
 
 export const attrClasses = ['body', 'mind', 'control']
 const attrNames = ['Тело', 'Разум', 'Контроль']
