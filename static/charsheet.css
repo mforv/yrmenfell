@@ -1,0 +1,325 @@
+@import url('https://fonts.googleapis.com/css2?family=Kurale&family=Open+Sans:ital,wght@0,400;0,600;1,400;1,600&family=Cousine&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 20px;
+    scroll-behavior: smooth;
+    overflow: auto;
+    scroll-padding-top: 0.5rem;
+}
+
+body { 
+    position: relative;
+    --mind: #4152a0;
+    --body: #e41f1a;
+    --control: #0597a7;
+    --key: #aa00ff;
+    --hclr: hsl(216, 100%, 40%);
+    --aclr: hsl(216, 100%, 60%);
+    --bclr: hsl(216, 25%, 95%);
+    --tocclr: hsl(216, 15%, 54%);
+    font-family: 'Open Sans', sans-serif; 
+    color: #111;
+    margin: 0; 
+}
+
+header {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.container {
+    position: relative;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1rem 0;
+}
+
+.charsheet {
+    display: grid;
+    grid-template-columns: 1.75fr 3.25fr;
+    gap: 1rem;
+}
+
+.inner-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--tocclr);
+    background-color: #fff;
+    padding: 0.5rem;
+}
+
+.modal {
+    position: absolute;
+    z-index: 999;
+    border-radius: 0.25rem;
+    border: 1px solid var(--tocclr);
+    background-color: #fff;
+    padding: 0.25rem;
+    width: max-content;
+    max-width: 15rem;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.25)
+}
+
+.glass-modal {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(0.5rem);
+    padding: 1rem;
+    border-radius: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: 2px 2px 0.5rem hsla(0, 0%, 15%, 0.5);
+}
+
+.glass-cover {
+    width: 100%;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    position: absolute;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mind { color: var(--mind); }
+.body { color: var(--body); }
+.control { color: var(--control); }
+
+.modal.mind { border-color: var(--mind); }
+.modal.body { border-color: var(--body); }
+.modal.control { border-color: var(--control); }
+
+.char-name { font-size: 1.1rem;}
+
+.attr-cell {
+    display: flex;
+    align-items: center;
+    position: relative;
+    gap: 0.2rem;
+}
+
+.attr-name { 
+    font-size: 0.8rem;
+    min-width: 1.9rem;
+}
+
+.key-attr-name {
+    border-bottom: 2px solid var(--key);
+}
+.attr-value {
+    font-size: 2.2rem;
+    font-weight: bold;
+    line-height: 1;
+    min-width: 2.5rem;
+    text-align: center;
+}
+
+.stat-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    position: relative;
+    flex-direction: column;
+}
+
+.equip-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+input, select {
+    appearance: none;
+    outline: 0;
+    padding: 0;
+    text-align: center;
+    background-color: #ffffff;
+    border: none;
+    border-bottom: 1px solid var(--tocclr);
+    font-size: inherit;
+    font-family: inherit;
+}
+input[type='checkbox'] {
+    appearance: auto;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+input[type='number'] {
+    appearance: auto;
+    padding: 0;
+}
+select {
+    cursor: pointer;
+}
+button {
+    padding: 0.25rem 0.5rem;
+    color: var(--hclr);
+    border: 1px solid var(--tocclr);
+    background-color: transparent;
+    border-radius: 0.2rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    outline: 0;
+}
+button:hover {
+    color: #ffffff;
+    background-color: var(--hclr);
+    border-color: var(--hclr);
+}
+button:disabled {
+    color: var(--tocclr);
+    background-color: var(--bclr);
+    border-color: var(--tocclr);
+    cursor: auto;
+}
+
+table {
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+th, td {
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    border-bottom: 2px solid var(--hclr);
+}
+
+tbody > tr:hover {
+    background-color: var(--bclr);
+}
+
+.section-title {
+    border-bottom: 2px solid var(--hclr);
+    font-weight: bold;
+}
+
+textarea.sheet {
+    font-family: inherit;
+    font-size: 0.8rem;
+    width: 100%;
+    resize: none;
+    outline: 0;
+    border: 1px solid var(--tocclr);
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+    line-height: 1.1;
+}
+
+textarea.tab {
+    resize: vertical;
+    height: 100%;
+}
+
+textarea.import {
+    resize: vertical;
+    font-family: monospace;
+    line-height: 1.2;
+}
+
+.tab-container {
+    height: 100%;
+}
+
+button.tab {
+    text-align: left;
+    border: none;
+    min-width: 6rem;
+    color: #111;
+    cursor: auto;
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding: 0.25rem;
+}
+
+button.tab:hover {
+    background-color: var(--bclr);
+}
+
+button.tab.active {
+    background-color: var(--bclr);
+}
+
+button.close {
+    align-self: end;
+    padding: 0;
+    border-radius: 50%;
+    width: 1.2rem;
+    height: 1.2rem;
+    line-height: 1;
+    color: #b71c1c;
+}
+button.close:hover {
+    background-color: #b71c1c;
+    color: #ffffff;
+    border-color: #b71c1c;
+}
+
+span.button-link {
+    display: flex;
+    background-color: #fff;
+    border-radius: 0.2rem;
+    text-align: center;
+    align-self: center;
+    font-size: 0.9rem;
+    border: 1px solid var(--tocclr);
+    cursor: pointer;
+}
+span.button-link:hover {
+    background-color: var(--hclr); 
+    border-color: var(--hclr);
+}
+span.button-link > a {
+    padding: 0.225rem; 
+    color: var(--hclr);
+}
+span.button-link:hover > a {
+    color: #fff;
+}
+
+span.button-link > button {
+    font-size: 0.9rem;
+    padding: 0.275rem;
+    border: none;
+}
+
+.hidden { display: none; }
+
+@media (max-width: 650px)
+{
+    .container {
+        padding: 1rem;
+    }
+    .charsheet {
+        grid-template-columns: auto;
+        gap: 0.5rem;
+    }
+    button.tab {
+        min-width: 3rem;
+        max-width: 5rem;
+        max-height: 1.7rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    span.button-link > button {
+        max-width: 5rem;
+        max-height: 1.8rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}

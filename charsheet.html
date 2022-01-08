@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:og="http://ogp.me/ns#">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Yrmenfell Character List</title>
+    <meta name="description" content="Лист персонажа для домашней настольной ролевой игры «Ирменфелл»."/>
+
+    <meta name="theme-color" content="#42588a" />
+    <link type="text/css" rel="stylesheet" href="/static/charsheet.css">
+    <script src="/static/lzutf8.min.js"></script>
+    <!-- <link rel="icon" type="image/png" href="./favicon.png"/> -->
+</head>
+<body>
+    <div class="container" id="charsheet-cont"></div>
+    <div class="modal hidden" id="cs-modal"></div>
+    <div class="glass-cover">
+        <div class="glass-modal" id="welcome-screen">
+            <textarea id="import-input" rows="12" cols="48" class="sheet import"></textarea>
+            <button id="import-btn" disabled>Импорт</button>
+            <button id="import-local-btn" disabled>Загрузить</button>
+            <button id="create-btn">Новый персонаж</button>
+            <span id="disclaimer" style="font-size: 0.6rem; max-width: 26.5rem; text-align: center;">Для автосохранения персонажа используется локальное хранилище браузера</span>
+        </div>
+
+        <div class="glass-modal hidden" id="new-char-modal">
+            <button id="new-char-close" class="close"></button>
+            <label for="new-char-name" style="font-weight: bold;">Имя персонажа</label>
+            <input type="text" id="new-char-name" style="font-size: 1.2rem; text-align: left;" required>
+            <label for="new-char-key-attr" style="font-weight: bold;">Ключевой атрибут</label>
+            <select id="new-char-key-attr" style="font-size: 1.2rem; text-align: left;">
+                <option value="0" class="body">Тело</option>
+                <option value="1" class="mind">Разум</option>
+                <option value="2" class="control">Контроль</option>
+            </select>
+            <label for="new-char-bio" style="font-weight: bold;">Биография</label>
+            <textarea id="new-char-bio-input" rows="5" cols="48" class="sheet import"></textarea>
+            <label for="new-char-legacy" style="font-weight: bold;">Наследие</label>
+            <textarea id="new-char-legacy-input" rows="5" cols="48" class="sheet import"></textarea>
+            <button id="new-char-create" disabled>Создать персонажа</button>
+        </div>
+
+        <div class="glass-modal hidden" id="export-modal" style="top: 7rem;">
+            <button id="export-close" class="close"></button>
+            <textarea id="export-code" rows="12" cols="48" class="sheet import" readonly></textarea>
+            <button id="export-copy">Скопировать</button>
+        </div>
+
+        <div class="glass-modal hidden" id="train-modal"></div>
+        <div class="glass-modal hidden" id="magic-modal"></div>
+    </div>
+    <script type="module">
+        const dm = await import("/static/charsheet.js");
+        const b64r = /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/gm;
+
+        // Проверить, сохранен ли персонаж в хранилище
+        let savedChar = localStorage.getItem('yrmChar');
+        if (savedChar)
+        {
+            document.querySelector("#import-local-btn").addEventListener('click', () => {
+                const charData = LZUTF8.decompress(savedChar, {'inputEncoding': 'Base64'})
+                dm.createChar(JSON.parse(charData), 'charsheet-cont');
+                dm.closeGlassModal();
+            });
+            document.querySelector("#import-local-btn").disabled = false;
+        }
+        else { document.querySelector("#import-local-btn").disabled = true; }
+
+        document.querySelector("#import-input").addEventListener('input', (event) => {
+            if (event.target.value.length % 4 === 0 && event.target.value.length > 0 && b64r.test(event.target.value))
+            { document.querySelector("#import-btn").disabled = false; }
+            else { document.querySelector("#import-btn").disabled = true; }
+        });
+        document.querySelector("#import-btn").addEventListener('click', () => {
+            const charData = LZUTF8.decompress(document.querySelector('#import-input').value, {'inputEncoding': 'Base64'})
+            dm.createChar(JSON.parse(charData), 'charsheet-cont');
+            dm.closeGlassModal();
+        });
+
+        // Создание нового персонажа
+        document.querySelector("#create-btn").addEventListener('click', () => {
+            dm.closeGlassModal();
+            document.querySelector('.glass-cover').classList.remove('hidden');
+            document.querySelector('#new-char-modal').classList.remove('hidden');
+        });
+
+        dm.renderCloseButton(document.querySelector("#new-char-close"));
+
+        document.querySelector("#new-char-key-attr").className = dm.attrClasses[document.querySelector("#new-char-key-attr").value]
+        document.querySelector("#new-char-key-attr").addEventListener('change', (event) => {
+            event.target.className = dm.attrClasses[event.target.value]
+        });
+
+        if (document.querySelector("#new-char-name").value.length > 0) document.querySelector("#new-char-create").disabled = false;
+        else document.querySelector("#new-char-create").disabled = true;
+
+        document.querySelector("#new-char-name").addEventListener('input', (event) => {
+            if (event.target.value.length > 0) document.querySelector("#new-char-create").disabled = false;
+            else document.querySelector("#new-char-create").disabled = true;
+        })
+        document.querySelector("#new-char-close").addEventListener('click', () => {
+            dm.closeGlassModal();
+            document.querySelector('.glass-cover').classList.remove('hidden');
+            document.querySelector('#welcome-screen').classList.remove('hidden');
+        })
+        document.querySelector("#new-char-create").addEventListener('click', () => {
+            const name = document.querySelector("#new-char-name").value;
+            const keyAttr = document.querySelector("#new-char-key-attr").value;
+            const bio = document.querySelector("#new-char-bio-input").value;
+            const legacyInput = document.querySelector("#new-char-legacy-input");
+            let legacy = null;
+            if (legacyInput.value.length % 4 === 0 && legacyInput.value.length > 0 && b64r.test(legacyInput.value))
+            { legacy = legacyInput.value; }
+            dm.newChar(name, keyAttr, bio, legacy);
+        })
+    </script>
+    <!-- <script>
+        // Предупреждение при выходе, если файл не был сохранен
+        window.addEventListener("beforeunload", (e) => { (e || window.event).returnValue = '0'; return '0'; });
+    </script> -->
+</body>
+</html>
