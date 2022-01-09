@@ -53,6 +53,12 @@ header {
     background-color: #fff;
     padding: 0.5rem;
 }
+.inner-block.train {
+    background-color: transparent;
+    flex-direction: row;
+    justify-content: center;
+    gap: 4rem;
+}
 
 .modal {
     position: absolute;
@@ -91,6 +97,23 @@ header {
     align-items: center;
 }
 
+.char-up-table {
+    display: grid; gap: 0.5rem;
+    grid-template-rows: repeat(12, max-content);
+    grid-auto-flow: column;
+}
+.char-up-entry {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    cursor: default;
+}
+
+.screen-header {
+    display: flex;
+    justify-content: space-between;
+}
+
 .mind { color: var(--mind); }
 .body { color: var(--body); }
 .control { color: var(--control); }
@@ -100,12 +123,23 @@ header {
 .modal.control { border-color: var(--control); }
 
 .char-name { font-size: 1.1rem;}
+.char-key {
+    display: flex;
+    font-size: 0.9rem;
+    gap: 0.5rem;
+    font-weight: bold;
+    align-items: center;
+}
 
 .attr-cell {
     display: flex;
     align-items: center;
     position: relative;
     gap: 0.2rem;
+}
+
+.train > .attr-cell {
+    min-width: 9rem;
 }
 
 .attr-name { 
@@ -151,12 +185,16 @@ input, select {
 }
 input[type='checkbox'] {
     appearance: auto;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    margin: 0;
 }
 input[type='number'] {
     appearance: auto;
     padding: 0;
+}
+input[type='text']:invalid {
+    border-bottom-color: #b71c1c;
 }
 select {
     cursor: pointer;
@@ -267,6 +305,15 @@ button.close:hover {
     border-color: #b71c1c;
 }
 
+button.close.xp {
+    color: var(--hclr);
+}
+button.close.xp:hover {
+    background-color: var(--hclr);
+    color: #ffffff;
+    border-color: var(--hclr);
+}
+
 span.button-link {
     display: flex;
     background-color: #fff;
@@ -308,13 +355,33 @@ span.button-link > button {
     }
     button.tab {
         min-width: 3rem;
-        max-width: 5rem;
+        max-width: 4rem;
         max-height: 1.7rem;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    
+    .inner-block.train {
+        gap: 0.2rem;
+    }
+    .train > .attr-cell {
+        min-width: 4.5rem;
+    }
+    tbody {
+        font-size: 0.8rem;
+    }
+    .char-up-table {
+        grid-template-columns: auto;
+        grid-auto-flow: row;
+        grid-template-rows: unset;
+    }
+    .char-up-entry { font-size: 0.8rem;}
+    .char-key {
+        margin-top: 0.25rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+    }
     span.button-link > button {
         max-width: 5rem;
         max-height: 1.8rem;

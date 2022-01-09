@@ -34,6 +34,9 @@ const charTemplate = {
     "notes": ""
 }
 
+const plusSVG = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="1em" height="1em" style="vertical-align: -0.125em;" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z" fill="currentColor"/></svg>'
+const closeSVG = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="1em" height="1em" style="vertical-align: -0.125em;" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z" fill="currentColor"></path></svg>'
+
 function sNum(n) { return ((n <= 0 ? '' : '+' ) + n).replace('-', '&minus;') }
 function sMon(n) { return (1*n).toLocaleString('ru-RU', {useGrouping: true}); }
 
@@ -53,28 +56,35 @@ function displayTrainScreen(char)
 {
     document.querySelector('.glass-cover').classList.remove('hidden');
     const trainScreen = document.querySelector('#train-modal');
-    trainScreen.innerHTML = '<button id="train-close" class="close"></button>';
 
     renderCloseButton(document.querySelector('#train-close'));
     document.querySelector('#train-close').addEventListener('click', closeGlassModal);
 
+    document.querySelector('#toggle-skill-info').onmouseenter = (event) => { showHint(event, 'Переключение показа всплывающей информации о навыках') }
+    document.querySelector('#toggle-skill-info').onmouseleave = () => hideModal()
+
     trainScreen.classList.remove('hidden');
-    trainScreen.style.top = '4rem';
+    trainScreen.style.top = window.matchMedia("(max-width: 650px)").matches ? '7rem' : '4rem';
+
+    if (trainScreen.querySelector('.inner-block.train'))
+    { trainScreen.removeChild(trainScreen.querySelector('.inner-block.train'))}
+    if (trainScreen.querySelector('.char-up-table'))
+    { trainScreen.removeChild(trainScreen.querySelector('.char-up-table'))}
 
     const attrUp = document.createElement('div');
-    attrUp.className = 'inner-block';
-    attrUp.style.cssText = 'background-color: transparent; flex-direction: row; justify-content: center; gap: 4rem;'
+    attrUp.className = 'inner-block train';
     trainScreen.appendChild(attrUp);
     for (let [attrId, attrLvl] of char.attrs.entries())
     {
         let attrCost = attrLvl < 9 ? 1 : 3;
         attrCost = char.key_attr === attrId ? attrCost : attrCost * 2;
         let upBtnState = attrCost <= char.xp && char.attrs[attrId] < 12 ? '' : 'disabled';
+        const attrName = window.matchMedia("(max-width: 650px)").matches ? attrNames[attrId].slice(0, 3) : attrNames[attrId];
         const attrEntry = document.createElement('div');
         attrEntry.className = `attr-cell ${attrClasses[attrId]}`;
         attrEntry.style.cssText = "gap: 0.25rem; flex-direction: column;";
         attrEntry.innerHTML = `
-            <div style="font-size: 1.5rem; font-weight: bold;">${char.attrs[attrId]} ${attrNames[attrId]}</div>
+            <div style="font-size: 1.5rem; font-weight: bold;">${char.attrs[attrId]} ${attrName}</div>
             <button id="${char.id}-attr-${attrId}-up-btn" ${upBtnState}>Повысить (${attrCost} XP)</button>`;
         attrUp.appendChild(attrEntry);
         document.querySelector(`#${char.id}-attr-${attrId}-up-btn`).addEventListener('click', () => levelUpAttr(char, attrId, attrCost));
@@ -83,7 +93,7 @@ function displayTrainScreen(char)
     const skillTable = document.createElement('div');
     trainScreen.appendChild(skillTable);
 
-    skillTable.style.cssText = "display: grid; gap: 0.5rem; grid-template-rows: repeat(12, max-content); grid-auto-flow: column;"
+    skillTable.className = "char-up-table";
     for (let [skillId, skill] of Object.entries(SKILLS))
     {
         let skillCost = 1;
@@ -104,10 +114,14 @@ function displayTrainScreen(char)
                 `треб. <span class="${attrClasses[skill.attr]}">${attrMin} ${attrNames[skill.attr].slice(0,3).toUpperCase()}</span>`;
 
             const skillUpEntry = document.createElement('div');
-            skillUpEntry.style.cssText = 'display: flex; gap: 0.5rem;'
+            skillUpEntry.className = 'char-up-entry';
             skillUpEntry.innerHTML = `
-                <span class="${attrClasses[skill.attr]}">●</span> ${skill.name} ${skillRanks[curSkillLvl]}
+                <span class="${attrClasses[skill.attr]}">●</span> <span class="skill-name">${skill.name}&nbsp;${skillRanks[curSkillLvl]}</span>
                 <button id="${skillId}-up-btn" ${upBtnState} style="margin-left: auto; min-width: 8rem;">${skillUpText}</button>`;
+            skillUpEntry.querySelector('.skill-name').onmouseenter = (event) => {
+                if (document.querySelector('#toggle-skill-info').checked) showSkillHint(event, skill);
+            }
+            skillUpEntry.querySelector('.skill-name').onmouseleave = () => hideModal()
             skillTable.appendChild(skillUpEntry);
             document.querySelector(`#${skillId}-up-btn`).addEventListener('click', () => levelUpSkill(char, skillId, skillCost));
         }
@@ -147,18 +161,23 @@ function displayMagicScreen(char)
 {
     document.querySelector('.glass-cover').classList.remove('hidden');
     const magicScreen = document.querySelector('#magic-modal');
-    magicScreen.innerHTML = '<button id="magic-close" class="close"></button>';
 
     renderCloseButton(document.querySelector('#magic-close'));
     document.querySelector('#magic-close').addEventListener('click', closeGlassModal);
 
+    document.querySelector('#toggle-spell-info').onmouseenter = (event) => { showHint(event, 'Переключение показа всплывающей информации о заклинаниях') }
+    document.querySelector('#toggle-spell-info').onmouseleave = () => hideModal()
+
     magicScreen.classList.remove('hidden');
     magicScreen.style.top = '4rem';
+
+    if (magicScreen.querySelector('.char-up-table'))
+    { magicScreen.removeChild(magicScreen.querySelector('.char-up-table'))}
 
     const spellTable = document.createElement('div');
     magicScreen.appendChild(spellTable);
 
-    spellTable.style.cssText = "display: grid; gap: 0.5rem; grid-template-rows: repeat(12, max-content); grid-auto-flow: column;"
+    spellTable.className = "char-up-table";
     for (let [spellId, spell] of Object.entries(SPELLS))
     {
         if (!char.magic.includes(spellId))
@@ -175,10 +194,10 @@ function displayMagicScreen(char)
                 }
             }
             const spellUpEntry = document.createElement('div');
-            spellUpEntry.style.cssText = 'display: flex; gap: 0.5rem;'
+            spellUpEntry.className = 'char-up-entry';
             spellUpEntry.innerHTML = `
                 <span style="color: ${spellOrigins[spellOrigin]}">●</span> ${spell.name}
-                <button id="${spellId}-buy-btn" ${spellBtnState} style="margin-left: auto; min-width: 12rem;">${spellBuyText}</button>`;
+                <button id="${spellId}-buy-btn" ${spellBtnState} style="margin-left: auto; min-width: 11rem;">${spellBuyText}</button>`;
             spellTable.appendChild(spellUpEntry);
             document.querySelector(`#${spellId}-buy-btn`).addEventListener('click', () => {
                 char.magic.push(spellId);
@@ -194,6 +213,31 @@ function displayMagicScreen(char)
         noMagicMsg.textContent = 'Нет доступных заклинаний и ритуалов'
         spellTable.appendChild(noMagicMsg);
     }
+}
+
+/** Окно добавления XP */
+function displayAddXpScreen(char)
+{
+    document.querySelector('.glass-cover').classList.remove('hidden');
+    const magicScreen = document.querySelector('#add-xp-modal');
+
+    renderCloseButton(document.querySelector('#add-xp-close'));
+    document.querySelector('#add-xp-close').addEventListener('click', closeGlassModal);
+    
+    magicScreen.classList.remove('hidden');
+    magicScreen.style.top = '4rem';
+}
+
+/** Обработка нового опыта */
+function addNewXp(char)
+{
+    const newXp = Number.parseInt(document.querySelector('#add-xp-input').value);
+    char.xp += newXp;
+    char.xp_total += newXp;
+    document.querySelector(`#${char.id}-xp`).textContent = char.xp;
+    document.querySelector(`#${char.id}-xp-total`).textContent = char.xp_total;
+    autoSaveChar(char);
+    closeGlassModal();
 }
 
 /** Заполняем атрибуты и статы */
@@ -286,14 +330,17 @@ export function createChar(char, containerId)
     charHeader.innerHTML = `
     <div id="${char.id}-general">
         <strong class="char-name">${char.name}</strong>
-        <div style="display: flex; font-size: 0.9rem; gap: 0.5rem; font-weight: bold;">
-            <span class="${attrClasses[char.key_attr]}">Ключ: ${attrNames[char.key_attr]}</span>
-            <span style="border-left: 2px solid var(--tocclr); padding-left: 0.5rem;">Опыт: <span id="${char.id}-xp">${char.xp}</span>/${char.xp_total}</span>
+        <div class="char-key">
+            <span>Ключ:<span class="${attrClasses[char.key_attr]}"> ${attrNames[char.key_attr]}</span></span>
+            <span style="display: flex; flex-wrap: wrap; flex: 1;">
+                Опыт: <span id="${char.id}-xp" style="color: var(--hclr); margin-left: 0.2rem;">${char.xp}</span>/<span id="${char.id}-xp-total" style="color: var(--hclr);">${char.xp_total}</span>
+                <button class="close xp" id="add-xp-btn" style="margin-left: 0.2rem;">${plusSVG}</button>
+            </span>
         </div>
     </div>
     <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; align-self: center; justify-content: end; margin-left: auto;">
-        <button id="char-train">Повышение</button>
-        <button id="char-export-btn">Экспорт</button>
+        <button style="flex: 1;" id="char-train">Развитие</button>
+        <button style="flex: 1;" id="char-export-btn">Экспорт</button>
     </div>
     `
     document.querySelector('#'+containerId).appendChild(charHeader);
@@ -381,7 +428,14 @@ export function createChar(char, containerId)
         setActiveTab(event.target, event.target.id.split('-').slice(0, 2).join('-')+'-cont') })
     });
 
+    /** Кнопка показа экрана прокачки */
     document.querySelector('#char-train').addEventListener('click', () => displayTrainScreen(char));
+    
+    /** Кнопка добавления экспы */
+    document.querySelector('#add-xp-btn').onmouseenter = (event) => { showHint(event, 'Внести новые очки опыта') }
+    document.querySelector('#add-xp-btn').onmouseleave = () => hideModal()
+    document.querySelector('#add-xp-btn').addEventListener('click', () => displayAddXpScreen(char));
+    document.querySelector('#add-xp-confirm').addEventListener('click', () => addNewXp(char));
 
     /** Экспорт кода персонажа */
     document.querySelector('#char-export-btn').addEventListener('click', () => showExportCode(char));
@@ -472,21 +526,40 @@ export function closeGlassModal()
 /** Удобная функция для SVG-иконки кнопки закрытия */
 export function renderCloseButton(buttonElem)
 {
-    buttonElem.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" focusable="false" width="1em" height="1em" style="vertical-align: -0.125em;-ms-transform: rotate(360deg); -webkit-transform: rotate(360deg); transform: rotate(360deg);" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z" fill="currentColor"></path></svg>'
+    buttonElem.innerHTML = closeSVG;
+}
+
+/** Показать всплывающую подсказку */
+function showHint(event, message)
+{
+    const modal = document.querySelector('#cs-hint-modal');
+    modal.classList.remove('hidden');
+    modal.textContent = message;
+    setModalPos(event.target, 2);
+}
+
+/** Показать подсказку об умениях */
+function showSkillHint(event, skill)
+{
+    const modal = document.querySelector('#cs-hint-modal');
+    modal.classList.remove('hidden');
+    modal.style.cssText = 'display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem;'
+    modal.innerHTML = `<span>Атрибут: <span>${attrNames[skill.attr]}</span></span>`;
+    setModalPos(event.target, 2);
 }
 
 /** Скрыть модальное окно (всплывающую подсказку) */
 export function hideModal()
 {
-    document.querySelector('#dm-modal').className = 'modal hidden';
-    document.querySelector('#dm-modal').innerHTML = '';
-    document.querySelector('#dm-modal').removeAttribute('style');
+    document.querySelector('#cs-hint-modal').className = 'modal hidden';
+    document.querySelector('#cs-hint-modal').innerHTML = '';
+    document.querySelector('#cs-hint-modal').removeAttribute('style');
 }
 
 /** Установить положение модального окна относительно элемента, его вызвавшего */
 export function setModalPos(element, offsetY=2)
 {
-    const modal = document.querySelector('#dm-modal');
+    const modal = document.querySelector('#cs-hint-modal');
     const coord = element.getBoundingClientRect();
     let topOffset = (coord.bottom + offsetY + modal.offsetHeight > window.innerHeight) ? 
         (coord.top - offsetY - modal.offsetHeight) : coord.bottom + offsetY

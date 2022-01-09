@@ -14,7 +14,7 @@
 </head>
 <body>
     <div class="container" id="charsheet-cont"></div>
-    <div class="modal hidden" id="cs-modal"></div>
+    <div class="modal hidden" id="cs-hint-modal"></div>
     <div class="glass-cover">
         <div class="glass-modal" id="welcome-screen">
             <textarea id="import-input" rows="12" cols="48" class="sheet import"></textarea>
@@ -47,8 +47,29 @@
             <button id="export-copy">Скопировать</button>
         </div>
 
-        <div class="glass-modal hidden" id="train-modal"></div>
-        <div class="glass-modal hidden" id="magic-modal"></div>
+        <div class="glass-modal hidden" id="add-xp-modal">
+            <div class="screen-header">
+                <strong style="font-size: 0.9rem;">Новый опыт</strong>
+                <button id="add-xp-close" class="close"></button>
+            </div>
+            <input type="text" id="add-xp-input" pattern="[0-9]" placeholder="0" style="background-color: transparent;">
+            <button id="add-xp-confirm">Подтвердить</button>
+        </div>
+
+        <div class="glass-modal hidden" id="train-modal">
+            <div class="screen-header">
+                <input type="checkbox" id="toggle-skill-info">
+                <strong style="font-size: 0.9rem;">Развитие персонажа</strong>
+                <button id="train-close" class="close"></button>
+            </div>
+        </div>
+        <div class="glass-modal hidden" id="magic-modal">
+            <div class="screen-header">
+                <input type="checkbox" id="toggle-spell-info">
+                <strong style="font-size: 0.9rem;">Изучение магии</strong>
+                <button id="magic-close" class="close"></button>
+            </div>
+        </div>
     </div>
     <script type="module">
         const dm = await import("https://mforv.github.io/yrmenfell/static/charsheet.js");
