@@ -231,7 +231,8 @@ function displayAddXpScreen(char)
 /** Обработка нового опыта */
 function addNewXp(char)
 {
-    const newXp = Number.parseInt(document.querySelector('#add-xp-input').value);
+    let newXp = Number.parseInt(document.querySelector('#add-xp-input').value);
+    newXp = Number.isNaN(newXp) ? 0 : newXp;
     char.xp += newXp;
     char.xp_total += newXp;
     document.querySelector(`#${char.id}-xp`).textContent = char.xp;
