@@ -79,13 +79,14 @@ function displayTrainScreen(char)
         let attrCost = attrLvl < 9 ? 1 : 3;
         attrCost = char.key_attr === attrId ? attrCost : attrCost * 2;
         let upBtnState = attrCost <= char.xp && char.attrs[attrId] < 12 ? '' : 'disabled';
+        let attrUpText = attrLvl === 12 ? 'MAX' : `Повысить (${attrCost} XP)`;
         const attrName = window.matchMedia("(max-width: 650px)").matches ? attrNames[attrId].slice(0, 3) : attrNames[attrId];
         const attrEntry = document.createElement('div');
         attrEntry.className = `attr-cell ${attrClasses[attrId]}`;
         attrEntry.style.cssText = "gap: 0.25rem; flex-direction: column;";
         attrEntry.innerHTML = `
             <div style="font-size: 1.5rem; font-weight: bold;">${char.attrs[attrId]} ${attrName}</div>
-            <button id="${char.id}-attr-${attrId}-up-btn" ${upBtnState}>Повысить (${attrCost} XP)</button>`;
+            <button id="${char.id}-attr-${attrId}-up-btn" style="min-width: 7.25rem;" ${upBtnState}>${attrUpText}</button>`;
         attrUp.appendChild(attrEntry);
         document.querySelector(`#${char.id}-attr-${attrId}-up-btn`).addEventListener('click', () => levelUpAttr(char, attrId, attrCost));
     }
@@ -106,25 +107,32 @@ function displayTrainScreen(char)
             skillCost = rawSkillLvl * 2;
             attrMin = rawSkillLvl == 1 ? 6 : 10;
         }
-        if (curSkillLvl < 3)
+        let upBtnState = skillCost <= char.xp && char.attrs[skill.attr] >= attrMin ? '' : 'disabled';
+        let skillUpText = `треб. <span class="${attrClasses[skill.attr]}">${attrMin} ${attrNames[skill.attr].slice(0,3).toUpperCase()}</span>`
+        let skillRank = curSkillLvl;
+
+        if (curSkillLvl > 2)
         {
-            let upBtnState = skillCost <= char.xp && char.attrs[skill.attr] >= attrMin ? '' : 'disabled';
-
-            let skillUpText = char.attrs[skill.attr] >= attrMin ? `Приобрести (${skillCost} XP)`: 
-                `треб. <span class="${attrClasses[skill.attr]}">${attrMin} ${attrNames[skill.attr].slice(0,3).toUpperCase()}</span>`;
-
-            const skillUpEntry = document.createElement('div');
-            skillUpEntry.className = 'char-up-entry';
-            skillUpEntry.innerHTML = `
-                <span class="${attrClasses[skill.attr]}">●</span> <span class="skill-name">${skill.name}&nbsp;${skillRanks[curSkillLvl]}</span>
-                <button id="${skillId}-up-btn" ${upBtnState} style="margin-left: auto; min-width: 8rem;">${skillUpText}</button>`;
-            skillUpEntry.querySelector('.skill-name').onmouseenter = (event) => {
-                if (document.querySelector('#toggle-skill-info').checked) showSkillHint(event, skill);
-            }
-            skillUpEntry.querySelector('.skill-name').onmouseleave = () => hideModal()
-            skillTable.appendChild(skillUpEntry);
-            document.querySelector(`#${skillId}-up-btn`).addEventListener('click', () => levelUpSkill(char, skillId, skillCost));
+            skillUpText = 'MAX';
+            upBtnState = 'disabled';
+            skillRank = 2;
         }
+        else if (char.attrs[skill.attr] >= attrMin)
+        {
+            skillUpText = `Приобрести (${skillCost} XP)`;
+        }
+
+        const skillUpEntry = document.createElement('div');
+        skillUpEntry.className = 'char-up-entry';
+        skillUpEntry.innerHTML = `
+            <span class="${attrClasses[skill.attr]}">●</span> <span class="skill-name">${skill.name}&nbsp;${skillRanks[skillRank]}</span>
+            <button id="${skillId}-up-btn" ${upBtnState} style="margin-left: auto; min-width: 8rem;">${skillUpText}</button>`;
+        skillUpEntry.querySelector('.skill-name').onmouseenter = (event) => {
+            if (document.querySelector('#toggle-skill-info').checked) showSkillHint(event, skill);
+        }
+        skillUpEntry.querySelector('.skill-name').onmouseleave = () => hideModal()
+        skillTable.appendChild(skillUpEntry);
+        document.querySelector(`#${skillId}-up-btn`).addEventListener('click', () => levelUpSkill(char, skillId, skillCost));
     }
     const resetCharBlock = document.createElement('div');
     resetCharBlock.className = 'inner-block train';
@@ -413,27 +421,27 @@ export function createChar(char, containerId)
     charBlock.className = 'charsheet';
     charBlock.id = `char-${char.id}`;
     charBlock.innerHTML = `
-        <aside style="display: flex; gap: 0.5rem; flex-direction: column;">
+        <aside style="display: flex; gap: 0.5rem; flex-direction: column; align-self: flex-start;">
             <div id="${char.id}-attrs" class="inner-block" style="${attrCss}">${charParams[0]}</div>
             <div id="${char.id}-stats" class="inner-block" style="${attrCss}">${charParams[1]}</div>
             <div id="${char.id}-equip" class="inner-block">
                 <div class="equip-slot">
                     <div class="section-title">Основное оружие</div>
-                    <textarea rows="2" class="sheet" id="${char.id}-hand_main">${char.hand_main}</textarea>
+                    <textarea class="sheet" id="${char.id}-hand_main">${char.hand_main}</textarea>
                 </div>
                 <div class="equip-slot">
                     <div class="section-title">Вспомогательное оружие</div>
-                    <textarea rows="2" class="sheet" id="${char.id}-hand_off">${char.hand_off}</textarea>
+                    <textarea class="sheet" id="${char.id}-hand_off">${char.hand_off}</textarea>
                 </div>
                 <div class="equip-slot">
                     <div class="section-title">Облачение</div>
-                    <textarea rows="2" class="sheet" id="${char.id}-attire">${char.attire}</textarea>
+                    <textarea class="sheet" id="${char.id}-attire">${char.attire}</textarea>
                 </div>
             </div>
         </aside>
         <main style="display: flex; gap: 0.5rem; flex-direction: column;">
             <!-- Навыки -->
-            <div class="inner-block">
+            <div class="inner-block" style="max-height: 25rem; overflow: auto;">
                 <table id="${char.id}-skills">
                     <thead><tr><th colspan="2">Навыки</th></tr></thead>
                     <tbody>${displayCharSkills(char)}</tbody>

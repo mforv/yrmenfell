@@ -256,6 +256,9 @@ textarea.sheet {
     padding: 0.25rem;
     line-height: 1.1;
 }
+.equip-slot > textarea.sheet {
+    height: 64px;
+}
 
 textarea.tab {
     resize: vertical;

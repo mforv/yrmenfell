@@ -1,8 +1,9 @@
 {
-    "sp4" : {"name": "Щит", "origin": "s31", "level": 1, "cost": 2, "desc": ""},
-    "sp0" : {"name": "Ускорение", "origin": "s32", "level": 1, "cost": 2, "desc": "+1/2/3 Инициатива"},
-    "sp3" : {"name": "Вред", "origin": "s33", "level": 1, "cost": 2, "desc": ""},
-    "sp2" : {"name": "Телекинез", "origin": "s34", "level": 1, "cost": 2, "desc": ""},
-    "sp5" : {"name": "Невидимость", "origin": "s34", "level": 2, "cost": 5, "desc": ""},
-    "sp1" : {"name": "Замедление", "origin": "s35", "level": 1, "cost": 2, "desc": "&minus;1/2/3 Инициатива"}
+    "sp4" : {"name": "Щит", "origin": "sm08", "level": 1, "cost": 2, "desc": ""},
+    "sp0" : {"name": "Ускорение", "origin": "sm09", "level": 1, "cost": 2, "desc": "+1/2/3 Инициатива"},
+    "sp3" : {"name": "Вред", "origin": "sm10", "level": 1, "cost": 2, "desc": ""},
+    "sp2" : {"name": "Телекинез", "origin": "sm11", "level": 1, "cost": 2, "desc": ""},
+    "sp5" : {"name": "Невидимость", "origin": "sm11", "level": 2, "cost": 5, "desc": ""},
+    "sp6" : {"name": "Иллюзии", "origin": "sm11", "level": 3, "cost": 10, "desc": ""},
+    "sp1" : {"name": "Замедление", "origin": "sm12", "level": 1, "cost": 2, "desc": "&minus;1/2/3 Инициатива"}
 }
