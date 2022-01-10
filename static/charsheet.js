@@ -264,11 +264,8 @@ function displayResetXpScreen()
 /** Сброс опыта */
 function resetXp(char)
 {
-    char.xp = char.xp_total = 12;
-    document.querySelector(`#${char.id}-xp`).textContent = char.xp;
-    document.querySelector(`#${char.id}-xp-total`).textContent = char.xp_total;
-    autoSaveChar(char);
-    closeGlassModal();
+    char.xp_total = 12;
+    resetChar(char);
 }
 
 /** Окно сброса персонажа */
