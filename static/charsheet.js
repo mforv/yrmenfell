@@ -66,7 +66,7 @@ function displayTrainScreen(char)
     trainScreen.classList.remove('hidden');
     trainScreen.style.top = window.matchMedia("(max-width: 650px)").matches ? '7rem' : '4rem';
 
-    if (trainScreen.querySelector('.inner-block.train'))
+    while (trainScreen.querySelector('.inner-block.train'))
     { trainScreen.removeChild(trainScreen.querySelector('.inner-block.train'))}
     if (trainScreen.querySelector('.char-up-table'))
     { trainScreen.removeChild(trainScreen.querySelector('.char-up-table'))}
@@ -126,6 +126,12 @@ function displayTrainScreen(char)
             document.querySelector(`#${skillId}-up-btn`).addEventListener('click', () => levelUpSkill(char, skillId, skillCost));
         }
     }
+    const resetCharBlock = document.createElement('div');
+    resetCharBlock.className = 'inner-block train';
+    resetCharBlock.style.cssText = 'border: none; gap: 0.5rem; padding: 0.5rem 0 0;'
+    resetCharBlock.innerHTML = '<button class="danger">Сбросить развитие</button>';
+    resetCharBlock.querySelector('button').addEventListener('click', displayCharResetScreen);
+    trainScreen.appendChild(resetCharBlock);
 }
 
 /** Поднять уровень атрибута */
@@ -216,16 +222,16 @@ function displayMagicScreen(char)
 }
 
 /** Окно добавления XP */
-function displayAddXpScreen(char)
+function displayAddXpScreen()
 {
     document.querySelector('.glass-cover').classList.remove('hidden');
-    const magicScreen = document.querySelector('#add-xp-modal');
+    const xpScreen = document.querySelector('#add-xp-modal');
 
     renderCloseButton(document.querySelector('#add-xp-close'));
     document.querySelector('#add-xp-close').addEventListener('click', closeGlassModal);
     
-    magicScreen.classList.remove('hidden');
-    magicScreen.style.top = '4rem';
+    xpScreen.classList.remove('hidden');
+    xpScreen.style.top = '4rem';
 }
 
 /** Обработка нового опыта */
@@ -238,6 +244,63 @@ function addNewXp(char)
     document.querySelector(`#${char.id}-xp`).textContent = char.xp;
     document.querySelector(`#${char.id}-xp-total`).textContent = char.xp_total;
     autoSaveChar(char);
+    closeGlassModal();
+}
+
+/** Окно сброса XP */
+function displayResetXpScreen()
+{
+    resetGlassModals();
+    document.querySelector('.glass-cover').classList.remove('hidden');
+    const resetXpScreen = document.querySelector('#reset-xp-modal');
+
+    renderCloseButton(document.querySelector('#reset-xp-close'));
+    document.querySelector('#reset-xp-close').addEventListener('click', closeGlassModal);
+    
+    resetXpScreen.classList.remove('hidden');
+    resetXpScreen.style.top = '4rem';
+}
+
+/** Сброс опыта */
+function resetXp(char)
+{
+    char.xp = char.xp_total = 12;
+    document.querySelector(`#${char.id}-xp`).textContent = char.xp;
+    document.querySelector(`#${char.id}-xp-total`).textContent = char.xp_total;
+    autoSaveChar(char);
+    closeGlassModal();
+}
+
+/** Окно сброса персонажа */
+function displayCharResetScreen()
+{
+    resetGlassModals();
+    document.querySelector('.glass-cover').classList.remove('hidden');
+    const resetScreen = document.querySelector('#reset-char-modal');
+
+    renderCloseButton(document.querySelector('#reset-char-close'));
+    document.querySelector('#reset-char-close').addEventListener('click', closeGlassModal);
+    
+    resetScreen.classList.remove('hidden');
+    resetScreen.style.top = '4rem';
+}
+
+/** Сброс атрибутов, навыков и магии */
+function resetChar(char)
+{
+    char.attrs = [1, 1, 1];
+    char.stats = [3, 3, 1];
+    char.skills = {};
+    char.magic = [];
+    char.xp = char.xp_total;
+    autoSaveChar(char);
+    document.querySelector(`#${char.id}-xp`).textContent = char.xp;
+    document.querySelector(`#${char.id}-xp-total`).textContent = char.xp_total;
+    const params = displayCharParams(char);
+    document.querySelector(`#${char.id}-attrs`).innerHTML = params[0];
+    document.querySelector(`#${char.id}-stats`).innerHTML = params[1];
+    document.querySelector(`#${char.id}-skills > tbody`).innerHTML = displayCharSkills(char);
+    displayCharMagic(char);
     closeGlassModal();
 }
 
@@ -431,12 +494,15 @@ export function createChar(char, containerId)
 
     /** Кнопка показа экрана прокачки */
     document.querySelector('#char-train').addEventListener('click', () => displayTrainScreen(char));
-    
+    document.querySelector('#reset-char-confirm').addEventListener('click', () => resetChar(char));
+
     /** Кнопка добавления экспы */
     document.querySelector('#add-xp-btn').onmouseenter = (event) => { showHint(event, 'Внести новые очки опыта') }
     document.querySelector('#add-xp-btn').onmouseleave = () => hideModal()
-    document.querySelector('#add-xp-btn').addEventListener('click', () => displayAddXpScreen(char));
+    document.querySelector('#add-xp-btn').addEventListener('click', () => displayAddXpScreen());
     document.querySelector('#add-xp-confirm').addEventListener('click', () => addNewXp(char));
+    document.querySelector('#reset-xp-btn').addEventListener('click', () => displayResetXpScreen());
+    document.querySelector('#reset-xp-confirm').addEventListener('click', () => resetXp(char));
 
     /** Экспорт кода персонажа */
     document.querySelector('#char-export-btn').addEventListener('click', () => showExportCode(char));
@@ -452,7 +518,7 @@ export function createChar(char, containerId)
         })
         .catch(() => {
             event.target.textContent = 'Ошибка копирования'
-            event.target.style.cssText = 'background-color: #b71c1c; color: #fff;';
+            event.target.style.cssText = 'background-color: var(--dclr); color: #fff;';
             setTimeout(() => {
                 event.target.textContent = 'Скопировать';
                 event.target.removeAttribute('style');
@@ -479,7 +545,7 @@ export function newChar(name, keyAttr, bio, legacy=null)
     char.name = name;
     char.key_attr = 1*keyAttr;
     char.bio = bio;
-    char.xp = char.xp_total = oldChar ? oldChar.xp_total - 1 : 12;
+    char.xp = char.xp_total = oldChar ? oldChar.xp_total > 12 ? oldChar.xp_total - 1 : 12 : 12;
     char.money = oldChar ? Math.floor(oldChar.money / 2) : 2000;
     autoSaveChar(char);
     createChar(char, 'charsheet-cont');

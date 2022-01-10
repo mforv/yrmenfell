@@ -49,11 +49,23 @@
 
         <div class="glass-modal hidden" id="add-xp-modal">
             <div class="screen-header">
+                <span style="width: 24px;"></span>
                 <strong style="font-size: 0.9rem;">Новый опыт</strong>
                 <button id="add-xp-close" class="close"></button>
             </div>
             <input type="text" id="add-xp-input" pattern="[0-9]" placeholder="0" style="background-color: transparent;">
             <button id="add-xp-confirm">Подтвердить</button>
+            <button id="reset-xp-btn" class="danger">Сбросить опыт</button>
+        </div>
+
+        <div class="glass-modal hidden" id="reset-xp-modal">
+            <div class="screen-header">
+                <span style="width: 24px;"></span>
+                <strong style="font-size: 0.9rem;">Сброс опыта</strong>
+                <button id="reset-xp-close" class="close"></button>
+            </div>
+            <span style="font-size: 0.9rem; max-width: 20rem; text-align: center;">Весь заработанный и весь доступный опыт будут возвращены до их начального значения — 12.</span>
+            <button id="reset-xp-confirm" class="danger">Да, сбросить опыт</button>
         </div>
 
         <div class="glass-modal hidden" id="train-modal">
@@ -63,12 +75,23 @@
                 <button id="train-close" class="close"></button>
             </div>
         </div>
+
         <div class="glass-modal hidden" id="magic-modal">
             <div class="screen-header">
                 <input type="checkbox" id="toggle-spell-info">
                 <strong style="font-size: 0.9rem;">Изучение магии</strong>
                 <button id="magic-close" class="close"></button>
             </div>
+        </div>
+
+        <div class="glass-modal hidden" id="reset-char-modal">
+            <div class="screen-header">
+                <span style="width: 24px;"></span>
+                <strong style="font-size: 0.9rem;">Сброс персонажа</strong>
+                <button id="reset-char-close" class="close"></button>
+            </div>
+            <span style="font-size: 0.9rem; max-width: 28rem; text-align: center;">Персонаж будет возвращен к его начальному состоянию, будут сброшены все атрибуты, характеристики, навыки и заклинания. Весь потраченный опыт будет возвращен. Оружие, облачение и рюкзак сохранятся.</span>
+            <button id="reset-char-confirm" class="danger">Да, сбросить персонажа</button>
         </div>
     </div>
     <script type="module">

@@ -17,6 +17,7 @@ body {
     --body: #e41f1a;
     --control: #0597a7;
     --key: #aa00ff;
+    --dclr: #b71c1c;
     --hclr: hsl(216, 100%, 40%);
     --aclr: hsl(216, 100%, 60%);
     --bclr: hsl(216, 25%, 95%);
@@ -194,7 +195,7 @@ input[type='number'] {
     padding: 0;
 }
 input[type='text']:invalid {
-    border-bottom-color: #b71c1c;
+    border-bottom-color: var(--dclr);
 }
 select {
     cursor: pointer;
@@ -297,12 +298,12 @@ button.close {
     width: 1.2rem;
     height: 1.2rem;
     line-height: 1;
-    color: #b71c1c;
+    color: var(--dclr);
 }
 button.close:hover {
-    background-color: #b71c1c;
+    background-color: var(--dclr);
     color: #ffffff;
-    border-color: #b71c1c;
+    border-color: var(--dclr);
 }
 
 button.close.xp {
@@ -312,6 +313,14 @@ button.close.xp:hover {
     background-color: var(--hclr);
     color: #ffffff;
     border-color: var(--hclr);
+}
+button.danger {
+    color: var(--dclr);
+}
+button.danger:hover {
+    background-color: var(--dclr);
+    color: #ffffff;
+    border-color: var(--dclr);
 }
 
 span.button-link {
