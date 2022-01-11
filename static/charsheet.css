@@ -105,9 +105,13 @@ header {
 }
 .char-up-entry {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.25rem;
     align-items: center;
     cursor: default;
+}
+.char-up-entry > button {
+    margin-left: auto;
+    min-width: 8rem;
 }
 
 .screen-header {
@@ -141,6 +145,13 @@ header {
 
 .train > .attr-cell {
     min-width: 9rem;
+}
+.train > .attr-cell > .attr-data {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+.train > .attr-cell > button {
+    width: 7.25rem;
 }
 
 .attr-name { 
@@ -359,11 +370,14 @@ span.button-link > button {
 @media (max-width: 650px)
 {
     .container {
-        padding: 1rem;
+        padding: 0.2rem;
     }
     .charsheet {
         grid-template-columns: auto;
         gap: 0.5rem;
+    }
+    .glass-modal {
+        padding: 0.2rem;
     }
     button.tab {
         min-width: 3rem;
@@ -379,6 +393,12 @@ span.button-link > button {
     .train > .attr-cell {
         min-width: 4.5rem;
     }
+    .train > .attr-cell > .attr-data {
+        font-size: 1.4rem;
+    }
+    .train > .attr-cell > button {
+        width: 5.25rem;
+    }
     tbody {
         font-size: 0.8rem;
     }
@@ -387,7 +407,11 @@ span.button-link > button {
         grid-auto-flow: row;
         grid-template-rows: unset;
     }
-    .char-up-entry { font-size: 0.8rem;}
+    .char-up-entry { font-size: 0.8rem; gap: 0.1rem;}
+    .char-up-entry > button {
+        font-size: 0.7rem;
+        min-width: 7.25rem;
+    }
     .char-key {
         margin-top: 0.25rem;
         flex-direction: column;

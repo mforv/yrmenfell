@@ -7,11 +7,11 @@ const statShort = ['ЗДР', 'ВОЛ', 'ИНЦ']
 const skillRanks = ['I', 'II', 'III']
 const SKILL_LEVELS_DEFAULT = ["+2 при проверке", "+4 при проверке", "+6 при проверке"]
 const spellOrigins = {
-    "s31": "#f9a825",
-    "s32": "#b71c1c",
-    "s33": "#90a4ae",
-    "s34": "#0d47a1",
-    "s35": "#1b5e20"
+    "sm08": "#f9a825",
+    "sm09": "#b71c1c",
+    "sm10": "#90a4ae",
+    "sm11": "#0d47a1",
+    "sm12": "#1b5e20"
 }
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'
 
@@ -64,7 +64,7 @@ function displayTrainScreen(char)
     document.querySelector('#toggle-skill-info').onmouseleave = () => hideModal()
 
     trainScreen.classList.remove('hidden');
-    trainScreen.style.top = window.matchMedia("(max-width: 650px)").matches ? '7rem' : '4rem';
+    trainScreen.style.top = window.matchMedia("(max-width: 650px)").matches ? '6rem' : '4rem';
 
     while (trainScreen.querySelector('.inner-block.train'))
     { trainScreen.removeChild(trainScreen.querySelector('.inner-block.train'))}
@@ -85,8 +85,8 @@ function displayTrainScreen(char)
         attrEntry.className = `attr-cell ${attrClasses[attrId]}`;
         attrEntry.style.cssText = "gap: 0.25rem; flex-direction: column;";
         attrEntry.innerHTML = `
-            <div style="font-size: 1.5rem; font-weight: bold;">${char.attrs[attrId]} ${attrName}</div>
-            <button id="${char.id}-attr-${attrId}-up-btn" style="min-width: 7.25rem;" ${upBtnState}>${attrUpText}</button>`;
+            <div class="attr-data">${char.attrs[attrId]} ${attrName}</div>
+            <button id="${char.id}-attr-${attrId}-up-btn" ${upBtnState}>${attrUpText}</button>`;
         attrUp.appendChild(attrEntry);
         document.querySelector(`#${char.id}-attr-${attrId}-up-btn`).addEventListener('click', () => levelUpAttr(char, attrId, attrCost));
     }
@@ -126,7 +126,7 @@ function displayTrainScreen(char)
         skillUpEntry.className = 'char-up-entry';
         skillUpEntry.innerHTML = `
             <span class="${attrClasses[skill.attr]}">●</span> <span class="skill-name">${skill.name}&nbsp;${skillRanks[skillRank]}</span>
-            <button id="${skillId}-up-btn" ${upBtnState} style="margin-left: auto; min-width: 8rem;">${skillUpText}</button>`;
+            <button id="${skillId}-up-btn" ${upBtnState}>${skillUpText}</button>`;
         skillUpEntry.querySelector('.skill-name').onmouseenter = (event) => {
             if (document.querySelector('#toggle-skill-info').checked) showSkillHint(event, skill);
         }
@@ -211,7 +211,7 @@ function displayMagicScreen(char)
             spellUpEntry.className = 'char-up-entry';
             spellUpEntry.innerHTML = `
                 <span style="color: ${spellOrigins[spellOrigin]}">●</span> ${spell.name}
-                <button id="${spellId}-buy-btn" ${spellBtnState} style="margin-left: auto; min-width: 11rem;">${spellBuyText}</button>`;
+                <button id="${spellId}-buy-btn" ${spellBtnState}>${spellBuyText}</button>`;
             spellTable.appendChild(spellUpEntry);
             document.querySelector(`#${spellId}-buy-btn`).addEventListener('click', () => {
                 char.magic.push(spellId);
