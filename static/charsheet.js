@@ -5,13 +5,13 @@ export const attrClasses = ['body', 'mind', 'control']
 const attrNames = ['Тело', 'Разум', 'Контроль']
 const statShort = ['ЗДР', 'ВОЛ', 'ИНЦ']
 const skillRanks = ['I', 'II', 'III']
-const SKILL_LEVELS_DEFAULT = ["+2 при проверке", "+4 при проверке", "+6 при проверке"]
-const spellOrigins = {
-    "sm08": "#f9a825",
-    "sm09": "#b71c1c",
-    "sm10": "#90a4ae",
-    "sm11": "#0d47a1",
-    "sm12": "#1b5e20"
+const SKILL_LEVELS_DEFAULT = ["+2🎲 при проверке", "+4🎲 при проверке", "+6🎲 при проверке"]
+const spellArcana = {
+    "sm08": "gold",
+    "sm09": "mercury",
+    "sm10": "silver",
+    "sm11": "cobalt",
+    "sm12": "copper"
 }
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'
 
@@ -28,6 +28,7 @@ const charTemplate = {
     "hand_off": "",
     "attire": "",
     "magic": [],
+    "lore": "",
     "backpack": "",
     "money": 0,
     "bio": "",
@@ -64,7 +65,6 @@ function displayTrainScreen(char)
     document.querySelector('#toggle-skill-info').onmouseleave = () => hideModal()
 
     trainScreen.classList.remove('hidden');
-    trainScreen.style.top = window.matchMedia("(max-width: 650px)").matches ? '6rem' : '4rem';
 
     while (trainScreen.querySelector('.inner-block.train'))
     { trainScreen.removeChild(trainScreen.querySelector('.inner-block.train'))}
@@ -119,7 +119,7 @@ function displayTrainScreen(char)
         }
         else if (char.attrs[skill.attr] >= attrMin)
         {
-            skillUpText = `Приобрести (${skillCost} XP)`;
+            skillUpText = `Изучить (${skillCost} XP)`;
         }
 
         const skillUpEntry = document.createElement('div');
@@ -155,6 +155,7 @@ function levelUpAttr(char, attrId, attrCost)
     document.querySelector(`#${char.id}-attrs`).innerHTML = params[0];
     document.querySelector(`#${char.id}-stats`).innerHTML = params[1];
     document.querySelector(`#${char.id}-xp`).textContent = char.xp;
+    checkUnarmedDmg(char);
     displayTrainScreen(char);
 }
 
@@ -166,6 +167,7 @@ function levelUpSkill(char, skillId, skillCost)
     char.xp -= skillCost;
     autoSaveChar(char);
     document.querySelector(`#${char.id}-skills > tbody`).innerHTML = displayCharSkills(char);
+    displayCharMagic(char);
     document.querySelector(`#${char.id}-xp`).textContent = char.xp;
     displayTrainScreen(char);
 }
@@ -183,50 +185,69 @@ function displayMagicScreen(char)
     document.querySelector('#toggle-spell-info').onmouseleave = () => hideModal()
 
     magicScreen.classList.remove('hidden');
-    magicScreen.style.top = '4rem';
 
-    if (magicScreen.querySelector('.char-up-table'))
-    { magicScreen.removeChild(magicScreen.querySelector('.char-up-table'))}
+    if (magicScreen.querySelector('.spell-table'))
+    { magicScreen.removeChild(magicScreen.querySelector('.spell-table'))}
 
     const spellTable = document.createElement('div');
     magicScreen.appendChild(spellTable);
 
-    spellTable.className = "char-up-table";
+    spellTable.className = "spell-table";
+    const arcanaConts = []
+    for (let i = 0; i < 5; i++)
+    {
+        const arcCont = document.createElement('div');
+        arcCont.id = `arc-`+i;
+        arcCont.className = 'spell-list';
+        spellTable.appendChild(arcCont);
+        arcanaConts.push(arcCont);
+    }
+    let currentArcanum = 0;
+    let currentSpell = 0;
     for (let [spellId, spell] of Object.entries(SPELLS))
     {
+        const spellSkill = spell.skill;
+        let spellBuyText = `Изучено`;
+        let spellBtnState = 'disabled';
+        const spellXpCost = spell.level < 3 ? 1 : 2;
         if (!char.magic.includes(spellId))
         {
-            const spellOrigin = spell.origin;
-            let spellBuyText = `треб. ${SKILLS[spellOrigin].name} ${skillRanks[spell.level-1]}`;
-            let spellBtnState = 'disabled';
-            if (char.skills[spellOrigin])
+            spellBuyText = `${SKILLS[spellSkill].name.replace('Арканум', 'А.')} ${skillRanks[spell.level-1]}`;
+            if (char.skills[spellSkill] )
             {
-                if (char.skills[spellOrigin] >= spell.level)
+                if (char.skills[spellSkill] >= spell.level)
                 {
-                    spellBuyText = 'Приобрести';
-                    spellBtnState = '';
+                    spellBuyText = `Изучить (${spellXpCost} XP)`;
+                    spellBtnState = char.xp >= spellXpCost ? '' : spellBtnState;
                 }
             }
-            const spellUpEntry = document.createElement('div');
-            spellUpEntry.className = 'char-up-entry';
-            spellUpEntry.innerHTML = `
-                <span style="color: ${spellOrigins[spellOrigin]}">●</span> ${spell.name}
-                <button id="${spellId}-buy-btn" ${spellBtnState}>${spellBuyText}</button>`;
-            spellTable.appendChild(spellUpEntry);
-            document.querySelector(`#${spellId}-buy-btn`).addEventListener('click', () => {
-                char.magic.push(spellId);
-                autoSaveChar(char);
-                displayCharMagic(char);
-                displayMagicScreen(char);
-            });
+        }
+        const spellUpEntry = document.createElement('div');
+        spellUpEntry.className = 'char-up-entry';
+        spellUpEntry.innerHTML = `
+            <span class="arcanum ${spellArcana[spellSkill]}">●</span><span class="spell-name">${spell.name}</span>
+            <button id="${spellId}-buy-btn" ${spellBtnState}>${spellBuyText}</button>`;
+        spellUpEntry.querySelector('.spell-name').onmouseenter = (event) => {
+            if (document.querySelector('#toggle-spell-info').checked) showSpellHint(event, spell);
+        }
+        spellUpEntry.querySelector('.spell-name').onmouseleave = () => hideModal()
+        arcanaConts[currentArcanum].appendChild(spellUpEntry);
+        document.querySelector(`#${spellId}-buy-btn`).addEventListener('click', () => {
+            char.magic.push(spellId);
+            char.xp -= spellXpCost;
+            document.querySelector(`#${char.id}-xp`).textContent = char.xp;
+            autoSaveChar(char);
+            displayCharMagic(char);
+            displayMagicScreen(char);
+        });
+        currentSpell++;
+        if (currentSpell === 6)
+        {
+            currentArcanum++;
+            currentSpell = 0;
         }
     }
-    if (!spellTable.firstChild)
-    {
-        const noMagicMsg = document.createElement('div');
-        noMagicMsg.textContent = 'Нет доступных заклинаний и ритуалов'
-        spellTable.appendChild(noMagicMsg);
-    }
+    magicScreen.scrollIntoView();
 }
 
 /** Окно добавления XP */
@@ -237,9 +258,8 @@ function displayAddXpScreen()
 
     renderCloseButton(document.querySelector('#add-xp-close'));
     document.querySelector('#add-xp-close').addEventListener('click', closeGlassModal);
-    
+
     xpScreen.classList.remove('hidden');
-    xpScreen.style.top = '4rem';
 }
 
 /** Обработка нового опыта */
@@ -266,7 +286,7 @@ function displayResetXpScreen()
     document.querySelector('#reset-xp-close').addEventListener('click', closeGlassModal);
     
     resetXpScreen.classList.remove('hidden');
-    resetXpScreen.style.top = '4rem';
+    resetXpScreen.scrollIntoView();
 }
 
 /** Сброс опыта */
@@ -282,12 +302,12 @@ function displayCharResetScreen()
     resetGlassModals();
     document.querySelector('.glass-cover').classList.remove('hidden');
     const resetScreen = document.querySelector('#reset-char-modal');
-
+    
     renderCloseButton(document.querySelector('#reset-char-close'));
     document.querySelector('#reset-char-close').addEventListener('click', closeGlassModal);
     
     resetScreen.classList.remove('hidden');
-    resetScreen.style.top = '4rem';
+    resetScreen.scrollIntoView();
 }
 
 /** Сброс атрибутов, навыков и магии */
@@ -306,6 +326,7 @@ function resetChar(char)
     document.querySelector(`#${char.id}-stats`).innerHTML = params[1];
     document.querySelector(`#${char.id}-skills > tbody`).innerHTML = displayCharSkills(char);
     displayCharMagic(char);
+    checkUnarmedDmg(char);
     closeGlassModal();
 }
 
@@ -338,11 +359,18 @@ function displayCharParams(char)
     return paramData;
 }
 
+/** Проверить дамаг без оружия */
+function checkUnarmedDmg(char)
+{
+    const noWeaponDmg =  char.attrs[0] < 4 ? '1d3' : char.attrs[0] < 8 ? '1d3+1' : char.attrs[0] < 12 ? '1d6' : '1d6+2';
+    document.querySelector(`#${char.id}-hand_main`).value = char.hand_main === '' ? 'Без оружия: ' + noWeaponDmg + ', Оглушение' : char.hand_main;
+}
+
 /** Заполняем навыки */
 function displayCharSkills(char)
 {
     let skillData = '';
-    for (let [skillId, lvl] of Object.entries(char.skills))
+    for (let [skillId, lvl] of Object.entries(char.skills).sort())
     {
         const skill = SKILLS[skillId];
         let skillBonus = skill.levels.length === 3 ? skill.levels[lvl-1] : SKILL_LEVELS_DEFAULT[lvl-1];
@@ -350,7 +378,7 @@ function displayCharSkills(char)
             <tr>
                 <td style="font-weight: bold;">
                     <span class="${attrClasses[skill.attr]}">●</span>
-                    ${skill.name} ${skillRanks[lvl-1]}
+                    ${skill.name}&nbsp;${skillRanks[lvl-1]}
                 </td>
                 <td>${skillBonus}</td>
             </tr>`;
@@ -367,28 +395,32 @@ function displayCharMagic(char)
     {
         const magicTable = document.createElement('table');
         magicTable.style.width = '100%';
-        const mtBody = document.createElement('tbody');
-        magicTable.appendChild(mtBody);
+        magicTable.style.fontSize = '0.8rem';
         magicCont.appendChild(magicTable);
-        for (let spell of char.magic)
+        const mtBody = magicTable.createTBody();
+        for (let spell of char.magic.sort())
         {
             const spellData = SPELLS[spell];
-            let spellEntry = document.createElement('tr');
-            spellEntry.innerHTML = `<td><span style="color: ${spellOrigins[spellData.origin]}">●</span>
-                ${spellData.name}</td><td>${spellData.level}</td><td>${spellData.cost}</td>`;
-            mtBody.appendChild(spellEntry);
+            const arcLvl = char.skills[spellData.skill] - 1;
+            let spellType = spellData.combat ? '⚔️' : '🗺️';
+            mtBody.insertRow().innerHTML = `
+                <td><span class="arcanum ${spellArcana[spellData.skill]}">●</span>&nbsp;<span id="${spell}-name" style="border-bottom: 1px dashed var(--tocclr); cursor: default;">${spellData.name}&nbsp;${spellType}</span></td>
+                <td><strong class="mind">[${spellData.cost}]</strong>&nbsp;${spellData.effects[arcLvl]}</td>`;
+            mtBody.rows.item(mtBody.rows.length - 1).id = 'r-'+spell;
+            mtBody.querySelector(`#${spell}-name`).onmouseenter = (event) => { showSpellHint(event, spellData) }
+            mtBody.querySelector(`#${spell}-name`).onmouseleave = () => hideModal()
         }
     }
     else
     {
         const noMagicMsg = document.createElement('div');
-        noMagicMsg.textContent = 'Нет известных заклинаний и ритуалов'
+        noMagicMsg.textContent = 'Нет известных заклинаний'
         magicCont.appendChild(noMagicMsg);
     }
     const newSpell = document.createElement('div');
     newSpell.style.cssText = 'margin-top: 0.5rem; display: flex; justify-content: end;';
-    newSpell.innerHTML = '<button>Добавить</button>';
-    newSpell.addEventListener('click', () => displayMagicScreen(char));
+    newSpell.innerHTML = '<button>Изучить</button>';
+    newSpell.querySelector('button').addEventListener('click', () => displayMagicScreen(char));
     magicCont.appendChild(newSpell);
 }
 
@@ -450,11 +482,14 @@ export function createChar(char, containerId)
 
             <!-- Вкладки -->
             <div class="inner-block" style="flex: 1;">
-                <div style="display: flex; gap: 0.25rem; border-bottom: 2px solid var(--hclr);">
-                    <button id="${char.id}-backpack-btn" class="tab active">Рюкзак</button>
-                    <button id="${char.id}-magic-btn" class="tab">Магия</button>
-                    <button id="${char.id}-notes-btn" class="tab">Заметки</button>
-                    <button id="${char.id}-bio-btn" class="tab">Биография</button>
+                <div class="nav-wrapper">
+                    <nav>
+                        <button id="${char.id}-backpack-btn" class="tab active">Рюкзак</button>
+                        <button id="${char.id}-magic-btn" class="tab">Магия</button>
+                        <button id="${char.id}-lore-btn" class="tab">Знания</button>
+                        <button id="${char.id}-notes-btn" class="tab">Заметки</button>
+                        <button id="${char.id}-bio-btn" class="tab">Биография</button>
+                    </nav>
                 </div>
                 <div class="tab-container" id="${char.id}-backpack-cont">
                     <textarea rows="10" class="sheet tab" id="${char.id}-backpack" style="height: calc(100% - 35px);">${char.backpack}</textarea>
@@ -464,6 +499,9 @@ export function createChar(char, containerId)
                     </div>
                 </div>
                 <div class="tab-container hidden" id="${char.id}-magic-cont"></div>
+                <div class="tab-container hidden" id="${char.id}-lore-cont">
+                    <textarea rows="10" class="sheet tab" id="${char.id}-lore">${char.lore}</textarea>
+                </div>
                 <div class="tab-container hidden" id="${char.id}-notes-cont">
                     <textarea rows="10" class="sheet tab" id="${char.id}-notes">${char.notes}</textarea>
                 </div>
@@ -473,6 +511,9 @@ export function createChar(char, containerId)
             </div>
         </main>`;
     document.querySelector('#'+containerId).appendChild(charBlock);
+
+    /** Проверяем дамаг без оружия */
+    checkUnarmedDmg(char);
 
     /** Заполняем магию */
     displayCharMagic(char);
@@ -613,10 +654,44 @@ function showHint(event, message)
 /** Показать подсказку об умениях */
 function showSkillHint(event, skill)
 {
+    let skillBonus = skill.levels.length === 3 ? skill.levels : SKILL_LEVELS_DEFAULT;
     const modal = document.querySelector('#cs-hint-modal');
     modal.classList.remove('hidden');
-    modal.style.cssText = 'display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.8rem;'
-    modal.innerHTML = `<span>Атрибут: <span>${attrNames[skill.attr]}</span></span>`;
+    modal.style.cssText = 'display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem;'
+    modal.innerHTML = `<span>${skill.desc}</span>
+    <strong>Связанный атрибут: <span class="${attrClasses[skill.attr]}">${attrNames[skill.attr]}</span></strong>
+    <strong>Эффекты</strong>
+    <div>
+        <div><strong style="display: inline-block; text-align: end; min-width: 1rem;">I:</strong> ${skillBonus[0]}</div>
+        <div><strong style="display: inline-block; text-align: end; min-width: 1rem;">II:</strong> ${skillBonus[1]}</div>
+        <div><strong style="display: inline-block; text-align: end; min-width: 1rem;">III:</strong> ${skillBonus[2]}</div>
+    </div>`;
+    setModalPos(event.target, 2);
+}
+
+/** Показать подсказку о заклинании */
+function showSpellHint(event, spell)
+{
+    const modal = document.querySelector('#cs-hint-modal');
+    modal.classList.remove('hidden');
+    modal.style.cssText = 'display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem;'
+    modal.classList.add('arcanum');
+    modal.classList.add(spellArcana[spell.skill]);
+    modal.innerHTML = `<strong style="display: flex; justify-content: space-between;">
+        <span>${SKILLS[spell.skill].name}</span>
+        <span>${spell.combat ? '⚔️ Боевое' : '🗺️ Небоевое'}</span>
+    </strong>
+    <strong style="display: flex; justify-content: space-between;">
+        <span class="mind">Затраты Воли: ${spell.cost}</span>
+        <span>Уровень: ${spell.level}</span>
+    </strong>
+    <span>${spell.desc}</span>
+    <strong>Эффекты</strong>
+    <div>
+        <div><strong style="display: inline-block; text-align: end; min-width: 1rem;">I:</strong> ${spell.effects[0]}</div>
+        <div><strong style="display: inline-block; text-align: end; min-width: 1rem;">II:</strong> ${spell.effects[1]}</div>
+        <div><strong style="display: inline-block; text-align: end; min-width: 1rem;">III:</strong> ${spell.effects[2]}</div>
+    </div>`;
     setModalPos(event.target, 2);
 }
 

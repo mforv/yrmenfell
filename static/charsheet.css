@@ -76,14 +76,20 @@ header {
 
 .glass-modal {
     position: absolute;
-    background-color: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(0.5rem);
+    background-color: hsl(0, 0%, 100%);
     padding: 1rem;
     border-radius: 0.25rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     box-shadow: 2px 2px 0.5rem hsla(0, 0%, 15%, 0.5);
+    top: 4rem;
+}
+@supports (backdrop-filter: blur(0)) {
+    .glass-modal {
+        background-color: hsla(0, 0%, 100%, 0.75);
+        backdrop-filter: blur(0.5rem);
+    }
 }
 
 .glass-cover {
@@ -109,9 +115,41 @@ header {
     align-items: center;
     cursor: default;
 }
+.char-up-entry > span.mind,
+.char-up-entry > span.body,
+.char-up-entry > span.control { min-width: 0.75rem;}
+
+.spell-table {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    max-width: 62.25rem;
+}
+.spell-table > .spell-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+span.arcanum { min-width: 0.75rem;}
+.arcanum.gold    { color: #f9a825; }
+.arcanum.mercury { color: #b71c1c; }
+.arcanum.silver  { color: #90a4ae; }
+.arcanum.cobalt  { color: #0d47a1; }
+.arcanum.copper  { color: #1b5e20; }
+
+.modal.arcanum.gold    { color: unset; border-color: #f9a825; }
+.modal.arcanum.mercury { color: unset; border-color: #b71c1c; }
+.modal.arcanum.silver  { color: unset; border-color: #90a4ae; }
+.modal.arcanum.cobalt  { color: unset; border-color: #0d47a1; }
+.modal.arcanum.copper  { color: unset; border-color: #1b5e20; }
+
+.char-up-entry > .skill-name, .char-up-entry > .spell-name 
+{ min-width: 11.5rem; margin-right: 0.25rem;}
+
 .char-up-entry > button {
     margin-left: auto;
-    min-width: 8rem;
+    min-width: 6.75rem;
 }
 
 .screen-header {
@@ -163,6 +201,7 @@ header {
     border-bottom: 2px solid var(--key);
 }
 .attr-value {
+    /* font-size: 3rem; */
     font-size: 2.2rem;
     font-weight: bold;
     line-height: 1;
@@ -190,8 +229,10 @@ input, select {
     padding: 0;
     text-align: center;
     background-color: #ffffff;
+    /* border: 1px solid var(--tocclr); */
     border: none;
     border-bottom: 1px solid var(--tocclr);
+    /* border-radius: 5px; */
     font-size: inherit;
     font-family: inherit;
 }
@@ -235,6 +276,8 @@ button:disabled {
 
 table {
     border-collapse: collapse;
+    /* margin-bottom: 1rem; */
+    /* border: 1px solid #cfd8dc; */
     font-size: 0.9rem;
 }
 
@@ -246,6 +289,8 @@ th, td {
 th {
     border-bottom: 2px solid var(--hclr);
 }
+
+td { padding: 0.125rem 0; }
 
 tbody > tr:hover {
     background-color: var(--bclr);
@@ -286,10 +331,27 @@ textarea.import {
     height: 100%;
 }
 
+.nav-wrapper {
+    white-space: nowrap;
+    overflow-x: auto; max-width: calc(100vw - 1.5rem);
+    min-height: 1.7rem;
+    scrollbar-width: none;
+}
+.nav-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+nav {
+    display: flex;
+    gap: 0.25rem;
+    border-bottom: 2px solid var(--hclr);
+    min-width: max-content;
+}
+
 button.tab {
     text-align: left;
     border: none;
-    min-width: 6rem;
+    min-width: 5rem;
     color: #111;
     cursor: auto;
     font-weight: bold;
@@ -378,14 +440,15 @@ span.button-link > button {
     }
     .glass-modal {
         padding: 0.2rem;
+        top: 6rem;
     }
     button.tab {
-        min-width: 3rem;
-        max-width: 4rem;
-        max-height: 1.7rem;
-        overflow: hidden;
+        min-width: 4rem;
+        /* max-width: 4rem; */
+        /* max-height: 1.7rem; */
+        /* overflow: hidden;
         text-overflow: ellipsis;
-        white-space: nowrap;
+        white-space: nowrap; */
     }
     .inner-block.train {
         gap: 0.2rem;
@@ -408,10 +471,9 @@ span.button-link > button {
         grid-template-rows: unset;
     }
     .char-up-entry { font-size: 0.8rem; gap: 0.1rem;}
-    .char-up-entry > button {
-        font-size: 0.7rem;
-        min-width: 7.25rem;
-    }
+    .char-up-entry > .skill-name, .char-up-entry > .spell-name
+    { min-width: 5rem; margin-right: 0.25rem;}
+    .spell-table > .spell-list { flex: 1; }
     .char-key {
         margin-top: 0.25rem;
         flex-direction: column;

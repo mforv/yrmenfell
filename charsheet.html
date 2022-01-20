@@ -16,7 +16,7 @@
     <div class="container" id="charsheet-cont"></div>
     <div class="modal hidden" id="cs-hint-modal"></div>
     <div class="glass-cover">
-        <div class="glass-modal" id="welcome-screen">
+        <div class="glass-modal" id="welcome-screen" style="top: unset;">
             <textarea id="import-input" rows="12" cols="48" class="sheet import"></textarea>
             <button id="import-btn" disabled>Импорт</button>
             <button id="import-local-btn" disabled>Загрузить</button>
@@ -24,7 +24,7 @@
             <span id="disclaimer" style="font-size: 0.6rem; max-width: 26.5rem; text-align: center;">Для автосохранения персонажа используется локальное хранилище браузера</span>
         </div>
 
-        <div class="glass-modal hidden" id="new-char-modal">
+        <div class="glass-modal hidden" id="new-char-modal" style="top: unset;">
             <button id="new-char-close" class="close"></button>
             <label for="new-char-name" style="font-weight: bold;">Имя персонажа</label>
             <input type="text" id="new-char-name" style="font-size: 1.2rem; text-align: left;" required>
@@ -64,13 +64,13 @@
                 <strong style="font-size: 0.9rem;">Сброс опыта</strong>
                 <button id="reset-xp-close" class="close"></button>
             </div>
-            <span style="font-size: 0.9rem; max-width: 26rem; text-align: center;">Весь опыт будет возвращен к начальному значению (12). При этом также будет произведен сброс персонажа. Персонаж будет возвращен к его начальному состоянию, будут сброшены все атрибуты, характеристики, навыки и заклинания. Оружие, облачение и рюкзак сохранятся.</span>
+            <span style="font-size: 0.9rem; max-width: 26rem; text-align: center;">Весь опыт будет возвращен к начальному значению (12). При этом будет произведен сброс персонажа. Персонаж будет возвращен к его начальному состоянию, будут сброшены все атрибуты, характеристики, навыки и заклинания. Оружие, облачение и рюкзак сохранятся.</span>
             <button id="reset-xp-confirm" class="danger">Да, сбросить опыт и персонажа</button>
         </div>
 
         <div class="glass-modal hidden" id="train-modal">
             <div class="screen-header">
-                <input type="checkbox" id="toggle-skill-info">
+                <input type="checkbox" id="toggle-skill-info" checked>
                 <strong style="font-size: 0.9rem;">Развитие персонажа</strong>
                 <button id="train-close" class="close"></button>
             </div>
@@ -78,7 +78,7 @@
 
         <div class="glass-modal hidden" id="magic-modal">
             <div class="screen-header">
-                <input type="checkbox" id="toggle-spell-info">
+                <input type="checkbox" id="toggle-spell-info" checked>
                 <strong style="font-size: 0.9rem;">Изучение магии</strong>
                 <button id="magic-close" class="close"></button>
             </div>
