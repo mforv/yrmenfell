@@ -166,7 +166,7 @@ function levelUpSkill(char, skillId, skillCost)
     else char.skills[skillId] = 1;
     char.xp -= skillCost;
     autoSaveChar(char);
-    document.querySelector(`#${char.id}-skills > tbody`).innerHTML = displayCharSkills(char);
+    displayCharSkills(char);
     displayCharMagic(char);
     document.querySelector(`#${char.id}-xp`).textContent = char.xp;
     displayTrainScreen(char);
@@ -324,7 +324,7 @@ function resetChar(char)
     const params = displayCharParams(char);
     document.querySelector(`#${char.id}-attrs`).innerHTML = params[0];
     document.querySelector(`#${char.id}-stats`).innerHTML = params[1];
-    document.querySelector(`#${char.id}-skills > tbody`).innerHTML = displayCharSkills(char);
+    displayCharSkills(char);
     displayCharMagic(char);
     checkUnarmedDmg(char);
     closeGlassModal();
@@ -369,21 +369,29 @@ function checkUnarmedDmg(char)
 /** Заполняем навыки */
 function displayCharSkills(char)
 {
-    let skillData = '';
+    const skillCont = document.querySelector(`#${char.id}-skills-cont`);
+    skillCont.innerHTML = '';
+    const skillTable = document.createElement('table');
+    skillTable.id =char.id+"skills";
+    skillTable.style.width = '100%';
+    // skillTable.style.fontSize = '0.8rem';
+    skillCont.appendChild(skillTable);
+    skillTable.createTHead().insertRow().innerHTML = `<th colspan="2">Навыки</th>`;
+    const skBody = skillTable.createTBody();
     for (let [skillId, lvl] of Object.entries(char.skills).sort())
     {
         const skill = SKILLS[skillId];
         let skillBonus = skill.levels.length === 3 ? skill.levels[lvl-1] : SKILL_LEVELS_DEFAULT[lvl-1];
-        skillData += `
-            <tr>
-                <td style="font-weight: bold;">
-                    <span class="${attrClasses[skill.attr]}">●</span>
-                    ${skill.name}&nbsp;${skillRanks[lvl-1]}
-                </td>
-                <td>${skillBonus}</td>
-            </tr>`;
+        skBody.insertRow().innerHTML = `
+        <td style="font-weight: bold;">
+            <span class="${attrClasses[skill.attr]}">●</span>&nbsp;
+            <span id="${skillId}-name" style="border-bottom: 1px dashed var(--tocclr); cursor: default;">
+            ${skill.name}&nbsp;${skillRanks[lvl-1]}</span>
+        </td><td>${skillBonus}</td>`;
+        skBody.rows.item(skBody.rows.length - 1).id = 'r-'+skillId;
+        skBody.querySelector(`#${skillId}-name`).onmouseenter = (event) => { showSkillHint(event, skill) }
+        skBody.querySelector(`#${skillId}-name`).onmouseleave = () => hideModal()
     }
-    return skillData;
 }
 
 /** Заполняем магию */
@@ -440,8 +448,8 @@ export function createChar(char, containerId)
         </div>
     </div>
     <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; align-self: center; justify-content: end; margin-left: auto;">
-        <button style="flex: 1;" id="char-train">Развитие</button>
-        <button style="flex: 1;" id="char-export-btn">Экспорт</button>
+        <button style="min-width: 4.75rem;" id="char-train">Развитие</button>
+        <button style="min-width: 4.75rem;" id="char-export-btn">Экспорт</button>
     </div>
     `
     document.querySelector('#'+containerId).appendChild(charHeader);
@@ -462,7 +470,7 @@ export function createChar(char, containerId)
                     <textarea class="sheet" id="${char.id}-hand_main">${char.hand_main}</textarea>
                 </div>
                 <div class="equip-slot">
-                    <div class="section-title">Вспомогательное оружие</div>
+                    <div class="section-title">Доп. оружие/щит</div>
                     <textarea class="sheet" id="${char.id}-hand_off">${char.hand_off}</textarea>
                 </div>
                 <div class="equip-slot">
@@ -473,12 +481,7 @@ export function createChar(char, containerId)
         </aside>
         <main style="display: flex; gap: 0.5rem; flex-direction: column;">
             <!-- Навыки -->
-            <div class="inner-block" style="max-height: 25rem; overflow: auto;">
-                <table id="${char.id}-skills">
-                    <thead><tr><th colspan="2">Навыки</th></tr></thead>
-                    <tbody>${displayCharSkills(char)}</tbody>
-                </table>
-            </div>
+            <div class="inner-block" id="${char.id}-skills-cont" style="max-height: 25rem; overflow: auto;"></div>
 
             <!-- Вкладки -->
             <div class="inner-block" style="flex: 1;">
@@ -491,6 +494,7 @@ export function createChar(char, containerId)
                         <button id="${char.id}-bio-btn" class="tab">Биография</button>
                     </nav>
                 </div>
+                <!-- Рюкзак -->
                 <div class="tab-container" id="${char.id}-backpack-cont">
                     <textarea rows="10" class="sheet tab" id="${char.id}-backpack" style="height: calc(100% - 35px);">${char.backpack}</textarea>
                     <div style="display: flex; justify-content: end; align-items: center; gap: 0.25rem; margin-top: 0.25rem;">
@@ -498,19 +502,26 @@ export function createChar(char, containerId)
                         <input id="${char.id}-money" type="text" value="${sMon(char.money)}" size="6" style="font-weight: bold;">
                     </div>
                 </div>
-                <div class="tab-container hidden" id="${char.id}-magic-cont"></div>
+                <!-- Магия -->
+                <div class="tab-container hidden" id="${char.id}-magic-cont" style="max-height: 25rem; overflow: auto;"></div>
+                <!-- Рецепты и ритуалы -->
                 <div class="tab-container hidden" id="${char.id}-lore-cont">
                     <textarea rows="10" class="sheet tab" id="${char.id}-lore">${char.lore}</textarea>
                 </div>
+                <!-- Заметки -->
                 <div class="tab-container hidden" id="${char.id}-notes-cont">
                     <textarea rows="10" class="sheet tab" id="${char.id}-notes">${char.notes}</textarea>
                 </div>
+                <!-- Био -->
                 <div class="tab-container hidden" id="${char.id}-bio-cont">
                     <textarea rows="10" class="sheet tab" id="${char.id}-bio">${char.bio}</textarea>
                 </div>
             </div>
         </main>`;
     document.querySelector('#'+containerId).appendChild(charBlock);
+
+    /** Заполняем скиллы */
+    displayCharSkills(char);
 
     /** Проверяем дамаг без оружия */
     checkUnarmedDmg(char);
@@ -522,9 +533,11 @@ export function createChar(char, containerId)
     document.querySelectorAll('textarea').forEach((elem) => { elem.addEventListener('change', (event) => {
         char[event.target.id.split('-')[1]] = event.target.value; autoSaveChar(char);})
     });
+    // Сохранение изменений в статах
     document.querySelectorAll('input.stat').forEach((elem) => { elem.addEventListener('change', (event) => {
         char.stats[event.target.id.split('-')[2]] = Number.parseInt(event.target.value); autoSaveChar(char);})
     });
+    // Сохранение изменений в деньгах
     document.querySelector(`#${char.id}-money`).addEventListener('change', (event) => {
         // тут важно, что это неразрывный пробел ( , который Alt+0160)
         char.money = 1*event.target.value.replaceAll(/,/g, '.').replaceAll(/ /g, '');
@@ -658,7 +671,7 @@ function showSkillHint(event, skill)
     const modal = document.querySelector('#cs-hint-modal');
     modal.classList.remove('hidden');
     modal.style.cssText = 'display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem;'
-    modal.innerHTML = `<span>${skill.desc}</span>
+    modal.innerHTML = `<strong>${skill.name}</strong><span>${skill.desc}</span>
     <strong>Связанный атрибут: <span class="${attrClasses[skill.attr]}">${attrNames[skill.attr]}</span></strong>
     <strong>Эффекты</strong>
     <div>
@@ -678,13 +691,14 @@ function showSpellHint(event, spell)
     modal.classList.add('arcanum');
     modal.classList.add(spellArcana[spell.skill]);
     modal.innerHTML = `<strong style="display: flex; justify-content: space-between;">
-        <span>${SKILLS[spell.skill].name}</span>
-        <span>${spell.combat ? '⚔️ Боевое' : '🗺️ Небоевое'}</span>
+        <span class="spell-name ${spellArcana[spell.skill]}">${spell.name}</span>
+        <span>${spell.combat ? '⚔️&nbsp;Боевое' : '🗺️&nbsp;Небоевое'}</span>
     </strong>
     <strong style="display: flex; justify-content: space-between;">
-        <span class="mind">Затраты Воли: ${spell.cost}</span>
+        <span>${SKILLS[spell.skill].name}</span>
         <span>Уровень: ${spell.level}</span>
     </strong>
+    <strong class="mind">Затраты Воли: ${spell.cost}</strong>
     <span>${spell.desc}</span>
     <strong>Эффекты</strong>
     <div>
