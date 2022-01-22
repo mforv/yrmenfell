@@ -113,7 +113,7 @@ function displayTrainScreen(char)
 
         if (curSkillLvl > 2)
         {
-            skillUpText = 'MAX';
+            skillUpText = 'Изучено';
             upBtnState = 'disabled';
             skillRank = 2;
         }
@@ -247,7 +247,6 @@ function displayMagicScreen(char)
             currentSpell = 0;
         }
     }
-    magicScreen.scrollIntoView();
 }
 
 /** Окно добавления XP */
@@ -370,13 +369,13 @@ function checkUnarmedDmg(char)
 function displayCharSkills(char)
 {
     const skillCont = document.querySelector(`#${char.id}-skills-cont`);
-    skillCont.innerHTML = '';
+    skillCont.innerHTML = '<strong class="inner-header">Навыки</strong>';
     const skillTable = document.createElement('table');
     skillTable.id =char.id+"skills";
     skillTable.style.width = '100%';
     // skillTable.style.fontSize = '0.8rem';
     skillCont.appendChild(skillTable);
-    skillTable.createTHead().insertRow().innerHTML = `<th colspan="2">Навыки</th>`;
+    // skillTable.createTHead().insertRow().innerHTML = `<th colspan="2">Навыки</th>`;
     const skBody = skillTable.createTBody();
     for (let [skillId, lvl] of Object.entries(char.skills).sort())
     {
@@ -428,7 +427,10 @@ function displayCharMagic(char)
     const newSpell = document.createElement('div');
     newSpell.style.cssText = 'margin-top: 0.5rem; display: flex; justify-content: end;';
     newSpell.innerHTML = '<button>Изучить</button>';
-    newSpell.querySelector('button').addEventListener('click', () => displayMagicScreen(char));
+    newSpell.querySelector('button').addEventListener('click', () => {
+        displayMagicScreen(char);
+        document.querySelector('#magic-modal').scrollIntoView();
+    });
     magicCont.appendChild(newSpell);
 }
 
@@ -447,9 +449,9 @@ export function createChar(char, containerId)
             </span>
         </div>
     </div>
-    <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; align-self: center; justify-content: end; margin-left: auto;">
-        <button style="min-width: 4.75rem;" id="char-train">Развитие</button>
-        <button style="min-width: 4.75rem;" id="char-export-btn">Экспорт</button>
+    <div class="controls">
+        <button id="char-train">Развитие</button>
+        <button id="char-export-btn">Экспорт</button>
     </div>
     `
     document.querySelector('#'+containerId).appendChild(charHeader);
@@ -461,7 +463,7 @@ export function createChar(char, containerId)
     charBlock.className = 'charsheet';
     charBlock.id = `char-${char.id}`;
     charBlock.innerHTML = `
-        <aside style="display: flex; gap: 0.5rem; flex-direction: column; align-self: flex-start;">
+        <aside>
             <div id="${char.id}-attrs" class="inner-block" style="${attrCss}">${charParams[0]}</div>
             <div id="${char.id}-stats" class="inner-block" style="${attrCss}">${charParams[1]}</div>
             <div id="${char.id}-equip" class="inner-block">
@@ -479,13 +481,13 @@ export function createChar(char, containerId)
                 </div>
             </div>
         </aside>
-        <main style="display: flex; gap: 0.5rem; flex-direction: column;">
+        <main>
             <!-- Навыки -->
-            <div class="inner-block" id="${char.id}-skills-cont" style="max-height: 25rem; overflow: auto;"></div>
+            <div class="inner-block headed" id="${char.id}-skills-cont"></div>
 
             <!-- Вкладки -->
-            <div class="inner-block" style="flex: 1;">
-                <div class="nav-wrapper">
+            <div class="inner-block headed" style="flex: 1;">
+                <div class="nav-wrapper inner-header">
                     <nav>
                         <button id="${char.id}-backpack-btn" class="tab active">Рюкзак</button>
                         <button id="${char.id}-magic-btn" class="tab">Магия</button>
@@ -503,7 +505,7 @@ export function createChar(char, containerId)
                     </div>
                 </div>
                 <!-- Магия -->
-                <div class="tab-container hidden" id="${char.id}-magic-cont" style="max-height: 25rem; overflow: auto;"></div>
+                <div class="tab-container hidden" id="${char.id}-magic-cont"></div>
                 <!-- Рецепты и ритуалы -->
                 <div class="tab-container hidden" id="${char.id}-lore-cont">
                     <textarea rows="10" class="sheet tab" id="${char.id}-lore">${char.lore}</textarea>

@@ -41,16 +41,11 @@ body {
     margin: 0; 
 }
 
-header {
-    display: flex;
-    margin-bottom: 1rem;
-}
-
 .container {
     position: relative;
     max-width: 960px;
     margin: 0 auto;
-    padding: 1rem 0;
+    padding-bottom: 1rem;
 }
 
 .charsheet {
@@ -75,6 +70,51 @@ header {
     gap: 4rem;
 }
 
+.inner-block.headed {
+    padding-top: 0;
+}
+.inner-block.headed > .inner-header {
+    padding-top: 0.5rem;
+    background-color: #ffffff;
+    border-bottom: 2px solid var(--hclr);
+    position: sticky;
+    top: 4.7rem;
+}
+
+header {
+    display: flex;
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    background-color: #ffffff;
+    z-index: 888;
+}
+
+header > .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    align-self: center;
+    justify-content: end;
+    margin-left: auto;
+}
+header > .controls > button { min-width: 4.75rem; }
+
+aside {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
+    align-self: flex-start;
+    position: sticky;
+    top: 4.7rem;
+}
+
+main {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
+}
+
 .modal {
     position: absolute;
     z-index: 999;
@@ -89,7 +129,7 @@ header {
 }
 
 .glass-modal {
-    position: absolute;
+    position: fixed;
     background-color: hsl(0, 0%, 100%);
     padding: 1rem;
     border-radius: 0.25rem;
@@ -116,6 +156,7 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 969;
 }
 
 .char-up-table {
@@ -159,11 +200,11 @@ span.arcanum { min-width: 0.75rem;}
 .modal.arcanum.copper  { color: unset; border-color: var(--copper); }
 
 .spell-name { margin-left: -0.25rem; padding: 0 .25rem; min-width: 3.75rem;}
-.spell-name.gold    { background: linear-gradient(90deg, var(--gold-a) 35%, rgba(255,255,255,0) 100%);  }
-.spell-name.mercury { background: linear-gradient(90deg, var(--mercury-a) 35%, rgba(255,255,255,0) 100%);  }
-.spell-name.silver  { background: linear-gradient(90deg, var(--silver-a) 35%, rgba(255,255,255,0) 100%);  }
-.spell-name.cobalt  { background: linear-gradient(90deg, var(--cobalt-a) 35%, rgba(255,255,255,0) 100%);  }
-.spell-name.copper  { background: linear-gradient(90deg, var(--copper-a) 35%, rgba(255,255,255,0) 100%);  }
+.spell-name.gold    { background: linear-gradient(90deg, var(--gold-a)    35%, transparent 100%);  }
+.spell-name.mercury { background: linear-gradient(90deg, var(--mercury-a) 35%, transparent 100%);  }
+.spell-name.silver  { background: linear-gradient(90deg, var(--silver-a)  35%, transparent 100%);  }
+.spell-name.cobalt  { background: linear-gradient(90deg, var(--cobalt-a)  35%, transparent 100%);  }
+.spell-name.copper  { background: linear-gradient(90deg, var(--copper-a)  35%, transparent 100%);  }
 
 .char-up-entry > .skill-name, .char-up-entry > .spell-name 
 { min-width: 11.5rem; margin-right: 0.25rem;}
@@ -271,7 +312,7 @@ button {
     padding: 0.25rem 0.5rem;
     color: var(--hclr);
     border: 1px solid var(--tocclr);
-    background-color: transparent;
+    background-color: #ffffff;
     border-radius: 0.2rem;
     font-size: 0.8rem;
     cursor: pointer;
@@ -347,7 +388,7 @@ textarea.import {
 .nav-wrapper {
     white-space: nowrap;
     overflow-x: auto; max-width: calc(100vw - 1.5rem);
-    min-height: 1.7rem;
+    min-height: 2.2rem;
     scrollbar-width: none;
 }
 .nav-wrapper::-webkit-scrollbar {
@@ -357,7 +398,7 @@ textarea.import {
 nav {
     display: flex;
     gap: 0.25rem;
-    border-bottom: 2px solid var(--hclr);
+    /* border-bottom: 2px solid var(--hclr); */
     min-width: max-content;
 }
 
@@ -445,49 +486,65 @@ span.button-link > button {
 @media (max-width: 650px)
 {
     .container {
-        padding: 0.2rem;
+        padding: 0 0.2rem 0.25rem;
     }
     .charsheet {
         grid-template-columns: auto;
         gap: 0.5rem;
     }
-    .glass-modal {
-        padding: 0.2rem;
-        top: 6rem;
+    header { 
+        padding-top: 0.2rem;
+        margin-bottom: 0.25rem;
+        padding-bottom: 0.25rem;
     }
-    button.tab {
-        min-width: 4rem;
+    aside { 
+        position: relative;
+        top: unset;
     }
-    .inner-block.train {
-        gap: 0.2rem;
-    }
-    .train > .attr-cell {
-        min-width: 4.5rem;
-    }
-    .train > .attr-cell > .attr-data {
-        font-size: 1.4rem;
-    }
-    .train > .attr-cell > button {
-        width: 5.25rem;
-    }
-    tbody {
-        font-size: 0.8rem;
-    }
-    .char-up-table {
-        grid-template-columns: auto;
-        grid-auto-flow: row;
-        grid-template-rows: unset;
-    }
-    .char-up-entry { font-size: 0.8rem; gap: 0.1rem;}
-    .char-up-entry > .skill-name, .char-up-entry > .spell-name
-    { min-width: 5rem; margin-right: 0.25rem;}
-    .spell-table > .spell-list { flex: 1; }
+
     .char-key {
         margin-top: 0.25rem;
         flex-direction: column;
         align-items: stretch;
         gap: 0;
     }
+
+    .inner-block.headed > .inner-header { top: 6rem; }
+
+    .glass-modal {
+        position: absolute;
+        padding: 0.2rem;
+        top: 6rem;
+    }
+
+    button.tab {
+        min-width: 4rem;
+    }
+
+    .inner-block.train { gap: 0.2rem; }
+
+    .train > .attr-cell { min-width: 4.5rem; }
+    .train > .attr-cell > .attr-data { font-size: 1.4rem; }
+    .train > .attr-cell > button { width: 5.25rem; }
+
+    tbody { font-size: 0.8rem; }
+
+    .char-up-table {
+        grid-template-columns: auto;
+        grid-auto-flow: row;
+        grid-template-rows: unset;
+    }
+
+    .char-up-entry { font-size: 0.8rem; gap: 0.1rem;}
+
+    .char-up-entry > .skill-name,
+    .char-up-entry > .spell-name { 
+        min-width: 5rem; 
+        margin-right: 0.25rem;
+    }
+
+    .spell-table > .spell-list { flex: 1; }
+
     span.button-link > button {
         max-width: 5rem;
         max-height: 1.8rem;
