@@ -159,6 +159,18 @@ main {
     z-index: 969;
 }
 
+.new-char-base { top: unset !important; }
+.new-char-base label { font-weight: bold; }
+.new-char-base label > span {
+    width: 1.2rem;
+    height: 1.2rem;
+    line-height: 1;
+    font-weight: normal;
+    color: var(--hclr);
+    background-color: #ffffff;
+}
+.new-char-base label > span > svg { padding-left: .12rem; padding-top: .12rem;}
+
 .char-up-table {
     display: grid; gap: 0.5rem;
     grid-template-rows: repeat(12, max-content);

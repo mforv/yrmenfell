@@ -24,19 +24,26 @@
             <span id="disclaimer" style="font-size: 0.6rem; max-width: 26.5rem; text-align: center;">Для автосохранения персонажа используется локальное хранилище браузера</span>
         </div>
 
-        <div class="glass-modal hidden" id="new-char-modal" style="top: unset;">
-            <button id="new-char-close" class="close"></button>
-            <label for="new-char-name" style="font-weight: bold;">Имя персонажа</label>
+        <div class="glass-modal new-char-base hidden" id="new-char-modal">
+            <div class="screen-header">
+                <input type="checkbox" id="toggle-new-char-intro" checked>
+                <strong style="font-size: 0.9rem;">Создание персонажа</strong>
+                <button id="new-char-close" class="close"></button>
+            </div>
+            <label for="new-char-name">Имя персонажа <span id="new-char-name-info"></span></label>
             <input type="text" id="new-char-name" style="font-size: 1.2rem; text-align: left;" required>
-            <label for="new-char-key-attr" style="font-weight: bold;">Ключевой атрибут</label>
+            <label for="new-char-key-attr">Ключевой атрибут <span id="new-char-key-info"></span></label>
             <select id="new-char-key-attr" style="font-size: 1.2rem; text-align: left;">
                 <option value="0" class="body">Тело</option>
                 <option value="1" class="mind">Разум</option>
                 <option value="2" class="control">Контроль</option>
             </select>
-            <label for="new-char-bio" style="font-weight: bold;">Биография</label>
+            <label for="new-char-bio">Биография <span id="new-char-bio-info"></span></label>
             <textarea id="new-char-bio-input" rows="5" cols="48" class="sheet import"></textarea>
-            <label for="new-char-legacy" style="font-weight: bold;">Наследие</label>
+            <div style="display: flex;">
+                <label for="new-char-legacy">Наследие <span id="new-char-legacy-info"></span></label>
+                <button id="load-legacy-btn" style="margin-left: auto;">Загрузить</button>
+            </div>
             <textarea id="new-char-legacy-input" rows="5" cols="48" class="sheet import"></textarea>
             <button id="new-char-create" disabled>Создать персонажа</button>
         </div>
@@ -66,6 +73,11 @@
             </div>
             <span style="font-size: 0.9rem; max-width: 26rem; text-align: center;">Весь опыт будет возвращен к начальному значению (12). При этом будет произведен сброс персонажа. Персонаж будет возвращен к его начальному состоянию, будут сброшены все атрибуты, характеристики, навыки и заклинания. Оружие, облачение и рюкзак сохранятся.</span>
             <button id="reset-xp-confirm" class="danger">Да, сбросить опыт и персонажа</button>
+        </div>
+
+        <div class="glass-modal hidden" id="intro-modal" style="max-width: 960px; padding: 0.5rem;">
+            <div id="intro-text-cont" style="font-size: 0.9rem;"></div>
+            <button id="intro-close" style="align-self: center;">Продолжить</button>
         </div>
 
         <div class="glass-modal hidden" id="train-modal">
@@ -98,6 +110,20 @@
         const dm = await import("https://mforv.github.io/yrmenfell/static/charsheet.js");
         const b64r = /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/gm;
 
+        document.querySelector('#toggle-new-char-intro').onmouseenter = (event) => { dm.showHint(event, 'Показать вводную информацию о мире. Рекомендуется, если это первый персонаж.') };
+        document.querySelector('#toggle-new-char-intro').onmouseleave = () => dm.hideModal();
+
+        // Подсказки по полям ввода нового персонажа
+        document.querySelector('#new-char-name-info').onmouseenter = (event) => { dm.showHint(event, 'Личное имя персонажа, то, как к нему будут обращаться при встрече. Обязательное поле.') };
+        document.querySelector('#new-char-key-info').onmouseenter = (event) => { dm.showHint(event, 'Атрибут, к которому персонаж наиболее предрасположен. Влияет на то, какие навыки ему будет легче осваивать.<br /><span class="body">Тело</span> — насколько персонаж развит физически.<br /><span class="mind">Разум</span> — интеллектуальные качества персонажа.<br/><span class="control">Контроль</span> — как хорошо персонаж владеет своим телом, насколько быстры и точны его движения.') };
+        document.querySelector('#new-char-bio-info').onmouseenter = (event) => { dm.showHint(event, 'Предыстория персонажа в свободной форме. Для первого персонажа рекомендуется оставить это поле пустым.') };
+        document.querySelector('#new-char-legacy-info').onmouseenter = (event) => { dm.showHint(event, 'Если вы продолжаете историю, вставьте в это поле код вашего предыдущего персонажа для корректного расчета опыта и денежных средств.<br />Кнопка «Загрузить» скопирует код персонажа из локального хранилища браузера.') };
+
+        document.querySelectorAll('.new-char-base label > span').forEach(elem => {
+            elem.onmouseleave = () => dm.hideModal();
+            dm.renderHelpElem(elem);
+        });
+
         // Проверить, сохранен ли персонаж в хранилище
         let savedChar = localStorage.getItem('yrmChar');
         if (savedChar)
@@ -107,9 +133,18 @@
                 dm.createChar(JSON.parse(charData), 'charsheet-cont');
                 dm.closeGlassModal();
             });
+            document.querySelector("#load-legacy-btn").addEventListener('click', () => {
+                document.querySelector("#new-char-legacy-input").value = savedChar;
+            });
             document.querySelector("#import-local-btn").disabled = false;
+            document.querySelector('#load-legacy-btn').disabled = false;
+            document.querySelector('#toggle-new-char-intro').checked = false;
         }
-        else { document.querySelector("#import-local-btn").disabled = true; }
+        else
+        {
+            document.querySelector("#import-local-btn").disabled = true;
+            document.querySelector("#load-legacy-btn").disabled = true;
+        }
 
         document.querySelector("#import-input").addEventListener('input', (event) => {
             if (event.target.value.length % 4 === 0 && event.target.value.length > 0 && b64r.test(event.target.value))
@@ -156,7 +191,8 @@
             let legacy = null;
             if (legacyInput.value.length % 4 === 0 && legacyInput.value.length > 0 && b64r.test(legacyInput.value))
             { legacy = legacyInput.value; }
-            dm.newChar(name, keyAttr, bio, legacy);
+            const intro = document.querySelector('#toggle-new-char-intro').checked;
+            dm.newChar(name, keyAttr, bio, legacy, intro);
         })
     </script>
     <!-- <script>

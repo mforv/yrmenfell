@@ -1,6 +1,8 @@
 const SKILLS = await fetch('https://mforv.github.io/yrmenfell/static/data/skills.json').then(resp => resp.json())
 const SPELLS = await fetch('https://mforv.github.io/yrmenfell/static/data/spells.json').then(resp => resp.json())
 
+const introText = await fetch('/static/data/intro.txt').then(resp => resp.text());
+
 export const attrClasses = ['body', 'mind', 'control']
 const attrNames = ['Тело', 'Разум', 'Контроль']
 const statShort = ['ЗДР', 'ВОЛ', 'ИНЦ']
@@ -14,6 +16,7 @@ const spellArcana = {
     "sm12": "copper"
 }
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'
+const defaultMoney = 100;
 
 const charTemplate = {
     "id": "",
@@ -36,6 +39,7 @@ const charTemplate = {
 }
 
 const plusSVG = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="1em" height="1em" style="vertical-align: -0.125em;" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M19 12.998h-6v6h-2v-6H5v-2h6v-6h2v6h6z" fill="currentColor"/></svg>'
+const helpSVG = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="1em" height="1em" style="vertical-align: -0.125em;" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M10 19h3v3h-3v-3m2-17c5.35.22 7.68 5.62 4.5 9.67c-.83 1-2.17 1.66-2.83 2.5C13 15 13 16 13 17h-3c0-1.67 0-3.08.67-4.08c.66-1 2-1.59 2.83-2.25C15.92 8.43 15.32 5.26 12 5a3 3 0 0 0-3 3H6a6 6 0 0 1 6-6z" fill="currentColor"></path></svg>'
 const closeSVG = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="1em" height="1em" style="vertical-align: -0.125em;" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z" fill="currentColor"></path></svg>'
 
 function sNum(n) { return ((n <= 0 ? '' : '+' ) + n).replace('-', '&minus;') }
@@ -50,6 +54,25 @@ export function genCharId(length=9)
         next_id += alphabet[Math.floor(0 + Math.random() * alphabet.length)];
     }
     return next_id
+}
+
+/** Отобразить экран вводной информации о мире */
+function displayIntroScreen(char)
+{
+    document.querySelector('.glass-cover').classList.remove('hidden');
+    const introScreen = document.querySelector('#intro-modal');
+    const introTextCont = introScreen.querySelector('#intro-text-cont');
+
+    let introLines = introText.split('\n');
+    for (let line of introLines)
+    {
+        introTextCont.innerHTML += `<p>${line}</p>`
+    }
+
+    document.querySelector('#intro-close').addEventListener('click', 
+    () => { closeGlassModal(); displayTrainScreen(char); });
+
+    introScreen.classList.remove('hidden');
 }
 
 /** Отобразить экран прокачки атрибутов и покупки навыков */
@@ -500,7 +523,7 @@ export function createChar(char, containerId)
                 <div class="tab-container" id="${char.id}-backpack-cont">
                     <textarea rows="10" class="sheet tab" id="${char.id}-backpack" style="height: calc(100% - 35px);">${char.backpack}</textarea>
                     <div style="display: flex; justify-content: end; align-items: center; gap: 0.25rem; margin-top: 0.25rem;">
-                        <label for="${char.id}-money">Кристаллы</label>
+                        <label for="${char.id}-money">Энары</label>
                         <input id="${char.id}-money" type="text" value="${sMon(char.money)}" size="6" style="font-weight: bold;">
                     </div>
                 </div>
@@ -591,7 +614,7 @@ export function createChar(char, containerId)
     return charBlock
 }
 
-export function newChar(name, keyAttr, bio, legacy=null)
+export function newChar(name, keyAttr, bio, legacy=null, showIntro=true)
 {
     closeGlassModal();
     let oldChar = null;
@@ -607,10 +630,11 @@ export function newChar(name, keyAttr, bio, legacy=null)
     char.key_attr = 1*keyAttr;
     char.bio = bio;
     char.xp = char.xp_total = oldChar ? oldChar.xp_total > 12 ? oldChar.xp_total - 1 : 12 : 12;
-    char.money = oldChar ? Math.floor(oldChar.money / 2) : 2000;
+    char.money = oldChar ? Math.floor(oldChar.money / 2) : defaultMoney;
     autoSaveChar(char);
     createChar(char, 'charsheet-cont');
-    displayTrainScreen(char);
+    if (showIntro) { displayIntroScreen(char); }
+    else { displayTrainScreen(char); }
 }
 
 /** Сбросить видимость всех модальных экранов во избежание конфликтов */
@@ -657,12 +681,18 @@ export function renderCloseButton(buttonElem)
     buttonElem.innerHTML = closeSVG;
 }
 
+/** Удобная функция для SVG-иконки информации */
+export function renderHelpElem(elem)
+{
+    elem.innerHTML = helpSVG;
+}
+
 /** Показать всплывающую подсказку */
-function showHint(event, message)
+export function showHint(event, message)
 {
     const modal = document.querySelector('#cs-hint-modal');
     modal.classList.remove('hidden');
-    modal.textContent = message;
+    modal.innerHTML = message;
     setModalPos(event.target, 2);
 }
 
