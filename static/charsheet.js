@@ -433,8 +433,9 @@ function displayCharMagic(char)
             const spellData = SPELLS[spell];
             const arcLvl = char.skills[spellData.skill] - 1;
             let spellType = spellData.combat ? '⚔️' : '🗺️';
+            let spellClass = spellData.instant ? '⚡' : '☄️';
             mtBody.insertRow().innerHTML = `
-                <td><span class="arcanum ${spellArcana[spellData.skill]}">●</span>&nbsp;<span id="${spell}-name" style="border-bottom: 1px dashed var(--tocclr); cursor: default;">${spellData.name}&nbsp;${spellType}</span></td>
+                <td><span class="arcanum ${spellArcana[spellData.skill]}">●</span>&nbsp;<span id="${spell}-name" style="border-bottom: 1px dashed var(--tocclr); cursor: default;">${spellData.name}&nbsp;${spellType}${spellClass}</span></td>
                 <td><strong class="mind">[${spellData.cost}]</strong>&nbsp;${spellData.effects[arcLvl]}</td>`;
             mtBody.rows.item(mtBody.rows.length - 1).id = 'r-'+spell;
             mtBody.querySelector(`#${spell}-name`).onmouseenter = (event) => { showSpellHint(event, spellData) }
@@ -728,9 +729,12 @@ function showSpellHint(event, spell)
     </strong>
     <strong style="display: flex; justify-content: space-between;">
         <span>${SKILLS[spell.skill].name}</span>
+        <span>${spell.instant ? '⚡&nbsp;Заклинание' : '☄️&nbsp;Колдовство'}</span>
+    </strong>
+    <strong style="display: flex; justify-content: space-between;">
+        <span class="mind">Затраты Воли: ${spell.cost}</span>
         <span>Уровень: ${spell.level}</span>
     </strong>
-    <strong class="mind">Затраты Воли: ${spell.cost}</strong>
     <span>${spell.desc}</span>
     <strong>Эффекты</strong>
     <div>
