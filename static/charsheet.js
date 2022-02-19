@@ -1,5 +1,6 @@
-const SKILLS = await fetch('https://mforv.github.io/yrmenfell/static/data/skills.json').then(resp => resp.json())
-const SPELLS = await fetch('https://mforv.github.io/yrmenfell/static/data/spells.json').then(resp => resp.json())
+const SKILLS = await fetch('https://mforv.github.io/yrmenfell/static/data/skills.json').then(resp => resp.json());
+const SPELLS = await fetch('https://mforv.github.io/yrmenfell/static/data/spells.json').then(resp => resp.json());
+const TABLES = await fetch('https://mforv.github.io/yrmenfell/static/data/tables.json').then(resp => resp.json());
 
 const introText = await fetch('https://mforv.github.io/yrmenfell/static/data/intro.txt').then(resp => resp.text());
 
@@ -384,7 +385,8 @@ function displayCharParams(char)
 /** Проверить дамаг без оружия */
 function checkUnarmedDmg(char)
 {
-    const noWeaponDmg =  char.attrs[0] < 4 ? '1d3' : char.attrs[0] < 8 ? '1d3+1' : char.attrs[0] < 12 ? '1d6' : '1d6+2';
+    const cB = char.attrs[0];
+    const noWeaponDmg = cB < 3 ? '1-1-1' : cB < 6 ? '1-2-3' : cB < 9 ? '1-3-6' : cB < 12 ? '1-5-9' : '1-6-12';
     document.querySelector(`#${char.id}-hand_main`).value = char.hand_main === '' ? 'Без оружия: ' + noWeaponDmg + ', Оглушение' : char.hand_main;
 }
 
@@ -409,10 +411,32 @@ function displayCharSkills(char)
             <span class="${attrClasses[skill.attr]}">●</span>&nbsp;
             <span id="${skillId}-name" style="border-bottom: 1px dashed var(--tocclr); cursor: default;">
             ${skill.name}&nbsp;${skillRanks[lvl-1]}</span>
-        </td><td>${skillBonus}</td>`;
+        </td><td id="${skillId}-effect">${skillBonus}</td>`;
         skBody.rows.item(skBody.rows.length - 1).id = 'r-'+skillId;
         skBody.querySelector(`#${skillId}-name`).onmouseenter = (event) => { showSkillHint(event, skill) }
         skBody.querySelector(`#${skillId}-name`).onmouseleave = () => hideModal()
+
+        switch(skillId)
+        {
+            case 'sm03': {
+                skBody.querySelector(`#${skillId}-effect > span`).style.cssText = 'cursor: default; border-bottom: 1px dashed var(--tocclr)';
+                skBody.querySelector(`#${skillId}-effect > span`).onmouseenter = (event) => { showPerfomance(event, lvl) }
+                skBody.querySelector(`#${skillId}-effect > span`).onmouseleave = () => hideModal();
+                break;
+            }
+            case 'sm04': {
+                skBody.querySelector(`#${skillId}-effect > span`).style.cssText = 'cursor: default; border-bottom: 1px dashed var(--tocclr)';
+                skBody.querySelector(`#${skillId}-effect > span`).onmouseenter = (event) => { showAlchemy(event, lvl) }
+                skBody.querySelector(`#${skillId}-effect > span`).onmouseleave = () => hideModal();
+                break;
+            }
+            case 'sm05': {
+                skBody.querySelector(`#${skillId}-effect > span`).style.cssText = 'cursor: default; border-bottom: 1px dashed var(--tocclr)';
+                skBody.querySelector(`#${skillId}-effect > span`).onmouseenter = (event) => { showRites(event, lvl) }
+                skBody.querySelector(`#${skillId}-effect > span`).onmouseleave = () => hideModal();
+                break;
+            }
+        }
     }
 }
 
@@ -742,6 +766,71 @@ function showSpellHint(event, spell)
         <div><strong style="display: inline-block; text-align: end; min-width: 1rem;">II:</strong> ${spell.effects[1]}</div>
         <div><strong style="display: inline-block; text-align: end; min-width: 1rem;">III:</strong> ${spell.effects[2]}</div>
     </div>`;
+    setModalPos(event.target, 2);
+}
+
+/** Всплывающая подсказка по доступным персонажу ритуалам */
+function showRites(event, level=1)
+{
+    const modal = document.querySelector('#cs-hint-modal');
+    modal.classList.remove('hidden');
+    modal.style.cssText = 'display: grid; gap: 0.5rem; font-size: 0.7rem; max-width: 30rem; grid-template-columns: auto auto;'
+    for (let rite of Object.values(TABLES.rites))
+    {
+        if (rite.level <= level)
+        {
+            modal.innerHTML += `<div style="display: flex; flex-direction: column; gap: 0.2rem;">
+            <strong>🌀 ${rite.name} (ур. ${rite.level})</strong>
+            <strong>Бросков на начертание рун: ${rite.level}</strong><span>${rite.desc}</span></div>`;
+        }
+    }
+    setModalPos(event.target, 2);
+}
+
+/** Всплывающая подсказка по доступным персонажу рецептам зелий */
+function showAlchemy(event, level=1)
+{
+    const modal = document.querySelector('#cs-hint-modal');
+    modal.classList.remove('hidden');
+    modal.style.cssText = 'display: grid; gap: 0.5rem; font-size: 0.7rem; max-width: 30rem; grid-template-columns: auto auto;'
+    for (let potion of Object.values(TABLES.alchemy))
+    {
+        if (potion.level <= level)
+        {
+            let formula = '';
+            for (let reagent of potion.formula)
+            {
+                switch (reagent)
+                {
+                    case 'W': formula += '🌊 Вода + '; break;
+                    case 'A': formula += '🌪️ Воздух + '; break;
+                    case 'F': formula += '🔥 Огонь + '; break;
+                    case 'E': formula += '🌿 Земля + '; break;
+                }
+            }
+            formula = formula.replace(/ \+ $/g, '');
+            modal.innerHTML += `<div style="display: flex; flex-direction: column; gap: 0.2rem;">
+            <strong>⚗️ ${potion.name} (ур. ${potion.level})</strong>
+            <strong>${formula}</strong><span>${potion.desc}</span></div>`;
+        }
+    }
+    setModalPos(event.target, 2);
+}
+
+/** Всплывающая подсказка по доступным персонажу ритуалам */
+function showPerfomance(event, level=1)
+{
+    const modal = document.querySelector('#cs-hint-modal');
+    modal.classList.remove('hidden');
+    modal.style.cssText = 'display: grid; gap: 0.5rem; font-size: 0.7rem; max-width: 30rem; grid-template-columns: auto auto;'
+    for (let warcry of Object.values(TABLES.perfomance))
+    {
+        if (warcry.level <= level)
+        {
+            modal.innerHTML += `<div style="display: flex; flex-direction: column; gap: 0.2rem;">
+            <strong>🎸 ${warcry.name} (ур. ${warcry.level})</strong><span>${warcry.desc}</span></div>`;
+        }
+    }
     setModalPos(event.target, 2);
 }
 
