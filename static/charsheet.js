@@ -5,11 +5,11 @@ const TABLES = await fetch('https://mforv.github.io/yrmenfell/static/data/tables
 const introText = await fetch('https://mforv.github.io/yrmenfell/static/data/intro.txt').then(resp => resp.text());
 
 export const attrClasses = ['body', 'mind', 'control']
-const attrNames = ['Тело', 'Разум', 'Контроль']
+export const attrNames = ['Тело', 'Разум', 'Контроль']
 const statShort = ['ЗДР', 'ВОЛ', 'ИНЦ']
-const skillRanks = ['I', 'II', 'III']
+export const skillRanks = ['I', 'II', 'III']
 const SKILL_LEVELS_DEFAULT = ["+2🎲 при проверке", "+4🎲 при проверке", "+6🎲 при проверке"]
-const spellArcana = {
+export const spellArcana = {
     "sm08": "gold",
     "sm09": "mercury",
     "sm10": "silver",
@@ -32,7 +32,6 @@ const charTemplate = {
     "hand_off": "",
     "attire": "",
     "magic": [],
-    "lore": "",
     "backpack": "",
     "money": 0,
     "bio": "",
@@ -43,8 +42,8 @@ const plusSVG = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www
 const helpSVG = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="1em" height="1em" style="vertical-align: -0.125em;" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M10 19h3v3h-3v-3m2-17c5.35.22 7.68 5.62 4.5 9.67c-.83 1-2.17 1.66-2.83 2.5C13 15 13 16 13 17h-3c0-1.67 0-3.08.67-4.08c.66-1 2-1.59 2.83-2.25C15.92 8.43 15.32 5.26 12 5a3 3 0 0 0-3 3H6a6 6 0 0 1 6-6z" fill="currentColor"></path></svg>'
 const closeSVG = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="1em" height="1em" style="vertical-align: -0.125em;" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z" fill="currentColor"></path></svg>'
 
-function sNum(n) { return ((n <= 0 ? '' : '+' ) + n).replace('-', '&minus;') }
-function sMon(n) { return (1*n).toLocaleString('ru-RU', {useGrouping: true}); }
+export function sNum(n) { return ((n <= 0 ? '' : '+' ) + n).replace('-', '&minus;') }
+export function sMon(n) { return (1*n).toLocaleString('ru-RU', {useGrouping: true}); }
 
 /** Сгенерить идентификатор персонажа */
 export function genCharId(length=9)
@@ -375,7 +374,7 @@ function displayCharParams(char)
             <input id="${char.id}-stat-${attrId}" type="text" value="${char.stats[attrId]}" class="stat ${attrClasses[attrId]}" style="font-weight: bold; width:3rem;">
             <div class="attr-name">
                 <strong>${statShort[attrId]}</strong>
-                <div style="font-weight: bold;">/ ${stat}</div>
+                <strong>/ ${stat}</strong>
             </div>
         </div>`;
     }
@@ -383,7 +382,7 @@ function displayCharParams(char)
 }
 
 /** Проверить дамаг без оружия */
-function checkUnarmedDmg(char)
+export function checkUnarmedDmg(char)
 {
     const cB = char.attrs[0];
     const noWeaponDmg = cB < 3 ? '1-1-1' : cB < 6 ? '1-2-3' : cB < 9 ? '1-3-6' : cB < 12 ? '1-5-9' : '1-6-12';
@@ -456,11 +455,18 @@ function displayCharMagic(char)
         {
             const spellData = SPELLS[spell];
             const arcLvl = char.skills[spellData.skill] - 1;
-            let spellType = spellData.combat ? '⚔️' : '🗺️';
-            let spellClass = spellData.instant ? '⚡' : '☄️';
+            let spellType = spellData.instant ? '⚡' : '☄️';
+            let calcSpellCost = spellData.cost;
+            let costColor = 'var(--mind)';
+            if (char.skills['sm06'])
+            {
+                calcSpellCost = spellData.cost - Math.pow(2, char.skills['sm06']-1);
+                calcSpellCost = calcSpellCost < 1 ? 1 : calcSpellCost;
+                costColor = '#087f23';
+            }
             mtBody.insertRow().innerHTML = `
-                <td><span class="arcanum ${spellArcana[spellData.skill]}">●</span>&nbsp;<span id="${spell}-name" style="border-bottom: 1px dashed var(--tocclr); cursor: default;">${spellData.name}&nbsp;${spellType}${spellClass}</span></td>
-                <td><strong class="mind">[${spellData.cost}]</strong>&nbsp;${spellData.effects[arcLvl]}</td>`;
+                <td><span class="arcanum ${spellArcana[spellData.skill]}">●</span>&nbsp;<span id="${spell}-name" style="border-bottom: 1px dashed var(--tocclr); cursor: default;">${spellData.name}&nbsp;${spellType}</span></td>
+                <td><strong style="color: ${costColor}">[${calcSpellCost}]</strong>&nbsp;${spellData.effects[arcLvl]}</td>`;
             mtBody.rows.item(mtBody.rows.length - 1).id = 'r-'+spell;
             mtBody.querySelector(`#${spell}-name`).onmouseenter = (event) => { showSpellHint(event, spellData) }
             mtBody.querySelector(`#${spell}-name`).onmouseleave = () => hideModal()
@@ -539,7 +545,6 @@ export function createChar(char, containerId)
                     <nav>
                         <button id="${char.id}-backpack-btn" class="tab active">Рюкзак</button>
                         <button id="${char.id}-magic-btn" class="tab">Магия</button>
-                        <button id="${char.id}-lore-btn" class="tab">Знания</button>
                         <button id="${char.id}-notes-btn" class="tab">Заметки</button>
                         <button id="${char.id}-bio-btn" class="tab">Биография</button>
                     </nav>
@@ -554,10 +559,6 @@ export function createChar(char, containerId)
                 </div>
                 <!-- Магия -->
                 <div class="tab-container hidden" id="${char.id}-magic-cont"></div>
-                <!-- Рецепты и ритуалы -->
-                <div class="tab-container hidden" id="${char.id}-lore-cont">
-                    <textarea rows="10" class="sheet tab" id="${char.id}-lore">${char.lore}</textarea>
-                </div>
                 <!-- Заметки -->
                 <div class="tab-container hidden" id="${char.id}-notes-cont">
                     <textarea rows="10" class="sheet tab" id="${char.id}-notes">${char.notes}</textarea>
@@ -722,7 +723,7 @@ export function showHint(event, message)
 }
 
 /** Показать подсказку об умениях */
-function showSkillHint(event, skill)
+export function showSkillHint(event, skill)
 {
     let skillBonus = skill.levels.length === 3 ? skill.levels : SKILL_LEVELS_DEFAULT;
     const modal = document.querySelector('#cs-hint-modal');
@@ -740,7 +741,7 @@ function showSkillHint(event, skill)
 }
 
 /** Показать подсказку о заклинании */
-function showSpellHint(event, spell)
+export function showSpellHint(event, spell)
 {
     const modal = document.querySelector('#cs-hint-modal');
     modal.classList.remove('hidden');
@@ -749,16 +750,13 @@ function showSpellHint(event, spell)
     modal.classList.add(spellArcana[spell.skill]);
     modal.innerHTML = `<strong style="display: flex; justify-content: space-between;">
         <span class="spell-name ${spellArcana[spell.skill]}">${spell.name}</span>
-        <span>${spell.combat ? '⚔️&nbsp;Боевое' : '🗺️&nbsp;Небоевое'}</span>
-    </strong>
-    <strong style="display: flex; justify-content: space-between;">
-        <span>${SKILLS[spell.skill].name}</span>
         <span>${spell.instant ? '⚡&nbsp;Заклинание' : '☄️&nbsp;Колдовство'}</span>
     </strong>
     <strong style="display: flex; justify-content: space-between;">
-        <span class="mind">Затраты Воли: ${spell.cost}</span>
+        <span>${SKILLS[spell.skill].name}</span>
         <span>Уровень: ${spell.level}</span>
     </strong>
+    <strong class="mind">Затраты Воли: ${spell.cost}</strong>
     <span>${spell.desc}</span>
     <strong>Эффекты</strong>
     <div>
@@ -770,7 +768,7 @@ function showSpellHint(event, spell)
 }
 
 /** Всплывающая подсказка по доступным персонажу ритуалам */
-function showRites(event, level=1)
+export function showRites(event, level=1)
 {
     const modal = document.querySelector('#cs-hint-modal');
     modal.classList.remove('hidden');
@@ -788,7 +786,7 @@ function showRites(event, level=1)
 }
 
 /** Всплывающая подсказка по доступным персонажу рецептам зелий */
-function showAlchemy(event, level=1)
+export function showAlchemy(event, level=1)
 {
     const modal = document.querySelector('#cs-hint-modal');
     modal.classList.remove('hidden');
@@ -818,7 +816,7 @@ function showAlchemy(event, level=1)
 }
 
 /** Всплывающая подсказка по доступным персонажу ритуалам */
-function showPerfomance(event, level=1)
+export function showPerfomance(event, level=1)
 {
     const modal = document.querySelector('#cs-hint-modal');
     modal.classList.remove('hidden');
