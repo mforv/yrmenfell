@@ -24,7 +24,7 @@ const charTemplate = {
     "name": "",
     "key_attr": 0,
     "attrs": [1, 1, 1],
-    "stats": [3, 3, 1],
+    "stats": [3, 3, 3],
     "skills": {},
     "xp": 12,
     "xp_total": 12,
@@ -170,8 +170,7 @@ function levelUpAttr(char, attrId, attrCost)
 {
     char.attrs[attrId]++;
     const attrLvl = char.attrs[attrId];
-    let attrStat = attrId < 2 ? attrLvl * 3 : attrLvl < 4 ? 1 : attrLvl < 8 ? 2 : attrLvl < 12 ? 3 : 4;
-    char.stats[attrId] = attrStat;
+    char.stats[attrId] = attrLvl * 3;
     char.xp -= attrCost;
     autoSaveChar(char);
     const params = displayCharParams(char);
@@ -336,7 +335,7 @@ function displayCharResetScreen()
 function resetChar(char)
 {
     char.attrs = [1, 1, 1];
-    char.stats = [3, 3, 1];
+    char.stats = [3, 3, 3];
     char.skills = {};
     char.magic = [];
     char.xp = char.xp_total;
@@ -368,13 +367,12 @@ function displayCharParams(char)
             </div>
         </div>`;
 
-        let stat = attrId < 2 ? attrLvl * 3 : attrLvl < 4 ? 1 : attrLvl < 8 ? 2 : attrLvl < 12 ? 3 : 4;
         paramData[1] += `
         <div class="attr-cell ${attrClasses[attrId]}" style="font-size: 1.8rem;">
             <input id="${char.id}-stat-${attrId}" type="text" value="${char.stats[attrId]}" class="stat ${attrClasses[attrId]}" style="font-weight: bold; width:3rem;">
             <div class="attr-name">
                 <strong>${statShort[attrId]}</strong>
-                <strong>/ ${stat}</strong>
+                <strong>/ ${attrLvl * 3}</strong>
             </div>
         </div>`;
     }
