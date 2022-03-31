@@ -11,9 +11,7 @@ html {
     scroll-padding-top: 0.5rem;
 }
 
-body { 
-    position: relative;
-
+body {
     --mind: #4152a0;
     --body: #e41f1a;
     --control: #0597a7;
@@ -30,15 +28,21 @@ body {
     --cobalt-a: rgba(13, 71, 161, 0.25);
     --copper-a: rgba(27, 94, 32, 0.25);
 
-    --dclr: #b71c1c;
-    --hclr: hsl(216, 100%, 40%);
-    --aclr: hsl(216, 100%, 60%);
+    --dclr: hsl(0, 73%, 41%);
     --bclr: hsl(216, 25%, 95%);
+    --hclr: hsl(216, 100%, 40%);
+    --fgclr: hsl(220, 17%, 17%);
     --tocclr: hsl(216, 15%, 54%);
 
+    --blocks-bg: #fff;
+    --elements-bg: #fff;
+    --common-box-shadow: rgba(184, 194, 215, 0.35) 0px 3px 6px 0px;
+
+    position: relative;
     font-family: 'Open Sans', sans-serif; 
-    color: #111;
-    margin: 0; 
+    color: var(--fgclr);
+    background-color: var(--bclr);
+    margin: 0;
 }
 
 .container {
@@ -59,15 +63,16 @@ body {
     flex-direction: column;
     gap: 0.5rem;
     border-radius: 0.25rem;
-    border: 1px solid var(--tocclr);
-    background-color: #fff;
+    background-color: var(--blocks-bg);
     padding: 0.5rem;
+    box-shadow: var(--common-box-shadow);
 }
 .inner-block.train {
     background-color: transparent;
     flex-direction: row;
     justify-content: center;
     gap: 4rem;
+    box-shadow: none;
 }
 
 .inner-block.headed {
@@ -75,7 +80,7 @@ body {
 }
 .inner-block.headed > .inner-header {
     padding-top: 0.5rem;
-    background-color: #ffffff;
+    background-color: var(--elements-bg);
     border-bottom: 2px solid var(--hclr);
     position: sticky;
     top: 4.7rem;
@@ -86,7 +91,7 @@ header {
     padding: 1rem 0;
     position: sticky;
     top: 0;
-    background-color: #ffffff;
+    background-color: var(--bclr);
     z-index: 888;
 }
 
@@ -136,7 +141,7 @@ main {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    box-shadow: 2px 2px 0.5rem hsla(0, 0%, 15%, 0.5);
+    box-shadow: var(--common-box-shadow);
     top: 4rem;
 }
 @supports (backdrop-filter: blur(0)) {
@@ -373,7 +378,8 @@ textarea.sheet {
     width: 100%;
     resize: none;
     outline: 0;
-    border: 1px solid var(--tocclr);
+    border: none;
+    background-color: var(--bclr);
     border-radius: 0.25rem;
     padding: 0.25rem;
     line-height: 1.1;
