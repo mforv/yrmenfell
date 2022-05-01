@@ -223,6 +223,13 @@ span.arcanum { min-width: 0.75rem;}
 .spell-name.cobalt  { background: linear-gradient(90deg, var(--cobalt-a)  35%, transparent 100%);  }
 .spell-name.copper  { background: linear-gradient(90deg, var(--copper-a)  35%, transparent 100%);  }
 
+input[type='checkbox'].attunement { width: 1rem; height: 1rem; }
+input[type='checkbox'].attunement.gold    { accent-color: var(--gold); }
+input[type='checkbox'].attunement.mercury { accent-color: var(--mercury); }
+input[type='checkbox'].attunement.silver  { accent-color: var(--silver); }
+input[type='checkbox'].attunement.cobalt  { accent-color: var(--cobalt); }
+input[type='checkbox'].attunement.copper  { accent-color: var(--copper); }
+
 .char-up-entry > .skill-name, .char-up-entry > .spell-name 
 { min-width: 11.5rem; margin-right: 0.25rem;}
 

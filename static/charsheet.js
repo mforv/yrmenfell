@@ -442,6 +442,27 @@ function displayCharMagic(char)
 {
     const magicCont = document.querySelector(`#${char.id}-magic-cont`);
     magicCont.innerHTML = '';
+    const arcanaAttunement = document.createElement('div');
+    arcanaAttunement.style.cssText = 'margin-bottom: 0.5rem; display: flex; justify-content: space-evenly; font-size: 0.9rem;';
+    let arcanaSlots = char.skills['sm06'] ? 1 + Math.pow(2, char.skills['sm06']-1) : 1;
+    for (let i = 8; i <= 12; i++)
+    {
+        let curArcanum = `sm${String(i).padStart(2, '0')}`;
+        if (char.skills[curArcanum])
+        {
+            let arcanaAttunementSlot = document.createElement('span');
+            arcanaAttunementSlot.innerHTML = `<input id="${char.id}-arc-${curArcanum}-opt" type="checkbox" class="attunement ${spellArcana[curArcanum]}"> <label for="${char.id}-arc-${curArcanum}-opt">${SKILLS[curArcanum]['name'].replace('Арканум', 'А.')}</label>`;
+            arcanaAttunement.append(arcanaAttunementSlot);
+        }
+    }
+    arcanaAttunement.querySelectorAll('.attunement').forEach(elem => {
+        elem.addEventListener('change', () => {
+            if (arcanaAttunement.querySelectorAll('.attunement:checked').length == arcanaSlots)
+            { arcanaAttunement.querySelectorAll('.attunement:not(:checked)').forEach(elem => { elem.disabled = true; }) }
+            else { arcanaAttunement.querySelectorAll('.attunement:disabled').forEach(elem => { elem.disabled = false; }) }
+        })
+    })
+    magicCont.append(arcanaAttunement);
     if (char.magic.length > 0)
     {
         const magicTable = document.createElement('table');
@@ -456,12 +477,6 @@ function displayCharMagic(char)
             let spellType = spellData.instant ? '⚡' : '☄️';
             let calcSpellCost = spellData.cost;
             let costColor = 'var(--mind)';
-            if (char.skills['sm06'])
-            {
-                calcSpellCost = spellData.cost - Math.pow(2, char.skills['sm06']-1);
-                calcSpellCost = calcSpellCost < 1 ? 1 : calcSpellCost;
-                costColor = '#087f23';
-            }
             mtBody.insertRow().innerHTML = `
                 <td><span class="arcanum ${spellArcana[spellData.skill]}">●</span>&nbsp;<span id="${spell}-name" style="border-bottom: 1px dashed var(--tocclr); cursor: default;">${spellData.name}&nbsp;${spellType}</span></td>
                 <td><strong style="color: ${costColor}">[${calcSpellCost}]</strong>&nbsp;${spellData.effects[arcLvl]}</td>`;
